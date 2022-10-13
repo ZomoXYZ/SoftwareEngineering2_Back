@@ -1,21 +1,22 @@
 package endpoints
 
 import (
+	"edu/letu/wan/util"
+
 	"github.com/gin-gonic/gin"
 )
 
 func Authorization(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"token": "1234567890",
+	//temp
+	var token = util.RandAll(32)
+
+	c.JSON(200, AuthorizationToken{
+		Token: token,
 	})
 }
 
-type CheeckAuthorizationBody struct {
-    Token string `json:"token" binding:"required"`
-}
-
 func CheckAuthorization(c *gin.Context) {
-	var requestBody CheeckAuthorizationBody
+	var requestBody AuthorizationToken
 
 	if err := c.BindJSON(&requestBody); err != nil {
 		return

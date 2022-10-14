@@ -1,6 +1,7 @@
 package main
 
 import (
+	"edu/letu/wan/database"
 	"edu/letu/wan/endpoints"
 
 	"github.com/gin-gonic/gin"
@@ -30,5 +31,7 @@ func main() {
 	r.GET("/meta/names", endpoints.MetaNames)
 	r.GET("/meta/pictures", endpoints.MetaPictures)
         
-	r.Run() // listen and serve on 0.0.0.0:8080
+	// r.Run() // listen and serve on 0.0.0.0:8080
+
+	database.Test()
 }

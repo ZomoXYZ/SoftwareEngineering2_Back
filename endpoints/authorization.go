@@ -1,6 +1,7 @@
 package endpoints
 
 import (
+	"edu/letu/wan/structs"
 	"edu/letu/wan/util"
 
 	"github.com/gin-gonic/gin"
@@ -10,13 +11,13 @@ func Authorization(c *gin.Context) {
 	//temp
 	var token = util.RandAll(32)
 
-	c.JSON(200, AuthorizationToken{
+	c.JSON(200, structs.AuthorizationToken{
 		Token: token,
 	})
 }
 
 func CheckAuthorization(c *gin.Context) {
-	var requestBody AuthorizationToken
+	var requestBody structs.AuthorizationToken
 
 	if err := c.BindJSON(&requestBody); err != nil {
 		return

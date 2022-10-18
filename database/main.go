@@ -10,7 +10,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func InitializeTable() {
+func Initialize() {
 	
 	//delete database file in case it exists
 	os.Remove("./wan.db")

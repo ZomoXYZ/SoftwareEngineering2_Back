@@ -25,7 +25,7 @@ func comparePlayer(player structs.PlayerInfo, id string, nameAdjective int, name
 // tests basic Set and Get functionality
 func TestSQLTable(t *testing.T) {
 	//initialize table
-	database.InitializeTable()
+	database.Initialize()
 	database.SetPlayer("1", "1111111111", 12, 55, 42)
 	database.SetPlayer("2", "2222222222", 98, 0, 67)
 	database.SetPlayer("3", "3333333333", 48, 72, 2)

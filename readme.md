@@ -3,9 +3,22 @@
 
 ## Dev Run
 
+to install (only has to be done when dependencies change)
+
 ```bash
 $ go install
+```
+
+to run
+
+```bash
 $ go run .
+```
+
+to test
+
+```bash
+$ go test
 ```
 
 ## Notes

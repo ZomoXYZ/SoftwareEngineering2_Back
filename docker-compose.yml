@@ -1,0 +1,18 @@
+services:
+  web:
+    build: .
+    volumes:
+      - weblog:/logs
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx:/etc/nginx/templates
+      - nginxlog:/logs
+    ports:
+      - "${NGINX_PORT}:${NGINX_PORT}"
+    environment:
+      - NGINX_PORT=${NGINX_PORT}
+      - NGINX_PATH=${NGINX_PATH}
+volumes:
+  nginxlog: {}
+  weblog: {}

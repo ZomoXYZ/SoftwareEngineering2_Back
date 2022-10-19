@@ -1,12 +1,17 @@
 package endpoints
 
 import (
+	"edu/letu/wan/database"
 	"edu/letu/wan/structs"
 
 	"github.com/gin-gonic/gin"
 )
 
 func GetSelf(c *gin.Context) {
+	if !database.IsAuthorized(c) {
+		return
+	}
+	
 	//temp
 	var player = structs.TempGeneratePlayer()
 
@@ -14,6 +19,10 @@ func GetSelf(c *gin.Context) {
 }
 
 func SetSelf(c *gin.Context) {
+	if !database.IsAuthorized(c) {
+		return
+	}
+	
 	var requestBody structs.SelfRestBody
 
 	if err := c.BindJSON(&requestBody); err != nil {

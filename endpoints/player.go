@@ -1,12 +1,17 @@
 package endpoints
 
 import (
+	"edu/letu/wan/database"
 	"edu/letu/wan/structs"
 
 	"github.com/gin-gonic/gin"
 )
 
 func GetPlayer(c *gin.Context) {
+	if !database.IsAuthorized(c) {
+		return
+	}
+	
 	var playerid = c.Param("playerid")
 
 	if len(playerid) < 16 {

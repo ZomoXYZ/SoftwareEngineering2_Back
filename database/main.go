@@ -26,6 +26,7 @@ func Initialize() {
 	CREATE TABLE wan (
 		id TEXT NOT NULL,
 		token TEXT NOT NULL,
+		expires TEXT NOT NULL,
 		name_adjective INTEGER NOT NULL,
 		name_noun INTEGER NOT NULL,
 		picture INTEGER NOT NULL,
@@ -33,6 +34,9 @@ func Initialize() {
 	);
 	DELETE FROM wan;
 	`
+
+	//TODO token expiration date in table!!!
+	//TODO auto delete old users
 
 	_, err = db.Exec(sqlStmt)
 	if err != nil {

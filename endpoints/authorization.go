@@ -11,6 +11,8 @@ func Authorization(c *gin.Context) {
 	//temp
 	var token = util.RandAll(32)
 
+	// this will generate a randomized user, the client may change it immediately after with /self
+
 	c.JSON(200, structs.AuthorizationToken{
 		Token: token,
 	})

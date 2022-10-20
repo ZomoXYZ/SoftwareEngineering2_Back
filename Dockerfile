@@ -5,7 +5,7 @@ WORKDIR /
 COPY . .
 
 # don't copy any database files
-RUN rm /*.db
+RUN rm -f /*.db
 
 # required for gcc
 RUN apk add build-base

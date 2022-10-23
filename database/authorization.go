@@ -1,21 +1,30 @@
 package database
 
-import "github.com/gin-gonic/gin"
+import (
+	"edu/letu/wan/structs"
 
-func IsAuthorized(c *gin.Context) bool {
+	"github.com/gin-gonic/gin"
+)
+
+func GetAuthorization(c *gin.Context) (string, *structs.PlayerInfo) {
 	token := c.Request.Header.Get("Authorization")
 	if token == "" {
 		c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
-		return false
+		return "", nil
 	}
 
 	player := GetPlayerByToken(token)
 	if player == nil {
 		c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
-		return false
+		return "", nil
 	}
 
 	//check if token is expired
 
-	return true
+	return token, player
+}
+
+func IsAuthorized(c *gin.Context) bool {
+	token, _ := GetAuthorization(c)
+	return token != ""
 }

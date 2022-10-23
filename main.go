@@ -1,7 +1,6 @@
 package main
 
 import (
-	"edu/letu/wan/database"
 	"edu/letu/wan/endpoints"
 
 	"github.com/gin-gonic/gin"
@@ -11,9 +10,6 @@ import (
 func main() {
 	// read .env file
 	godotenv.Load()
-
-	// initialize database
-	database.Initialize()
 
 	// initialize REST endpoints
 	r := gin.Default()

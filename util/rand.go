@@ -1,31 +1,30 @@
 package util
 
-import "math/rand"
+import (
+	"encoding/hex"
+	"math/rand"
+	"os"
+	"strconv"
+)
 
-var letterRunes = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-var numberRunes = []rune("0123456789")
-var allRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+var lobbyCodeRunes = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+func LobbyCode() string {
+    codeLength, err := strconv.Atoi(os.Getenv("LOBBY_CODE_LENGTH"))
+    if err != nil {
+        codeLength = 4
+    }
+    b := make([]rune, codeLength)
+    for i := range b {
+        b[i] = lobbyCodeRunes[rand.Intn(len(lobbyCodeRunes))]
+    }
+    return string(b)
+}
+//TODO should we ensure the output is never explicit?
 
-//should we ensure the output is never explicit?
-func RandChars(n int) string {
-    b := make([]rune, n)
-    for i := range b {
-        b[i] = letterRunes[rand.Intn(len(letterRunes))]
+func GenerateToken() string {
+    b := make([]byte, 32)
+    if _, err := rand.Read(b); err != nil {
+        return ""
     }
-    return string(b)
+    return hex.EncodeToString(b)
 }
-func RandNums(n int) string {
-    b := make([]rune, n)
-    for i := range b {
-        b[i] = numberRunes[rand.Intn(len(numberRunes))]
-    }
-    return string(b)
-}
-func RandAll(n int) string {
-    b := make([]rune, n)
-    for i := range b {
-        b[i] = allRunes[rand.Intn(len(allRunes))]
-    }
-    return string(b)
-}
-//should we ensure the output is never explicit?

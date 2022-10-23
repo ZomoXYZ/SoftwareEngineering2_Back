@@ -3,22 +3,29 @@ package endpoints
 import (
 	"edu/letu/wan/database"
 	"edu/letu/wan/structs"
-	"math/rand"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
 
 func GetLobbyList(c *gin.Context) {
-	if !database.IsAuthorized(c) {
+	if database.IsAuthorized(c) {
 		return
 	}
 
-	var lobbies []structs.LobbyInfo
-	for i := 0; i < rand.Intn(10); i++ {
-		lobbies = append(lobbies, structs.TempGenerateLobby())
+	var lobbies = database.GetAvailableLobbies()
+	var lobbyList = structs.LobbyListFromLobbies(lobbies)
+	
+	fmt.Println(lobbyList.Lobbies)
+	fmt.Println(lobbyList)
+
+	c.JSON(200, lobbyList)
+}
+
+func CreateLobby(c *gin.Context) {
+	if database.IsAuthorized(c) {
+		return
 	}
 
-	c.JSON(200, structs.LobbyList{
-		Lobbies: lobbies,
-	})
+	//TODO
 }

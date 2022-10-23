@@ -8,12 +8,11 @@ import (
 )
 
 func GetPlayer(c *gin.Context) {
-	if !database.IsAuthorized(c) {
+	if database.IsAuthorized(c) {
 		return
 	}
 	
 	var playerid = c.Param("playerid")
-
 	if len(playerid) < 16 {
 		c.JSON(400, structs.ErrorJson{
 			Error: "invalid player id",
@@ -21,9 +20,13 @@ func GetPlayer(c *gin.Context) {
 		return
 	}
 
-	//temp
-	var player = structs.TempGeneratePlayer()
-	player.ID = playerid
+	player := database.GetPlayerByID(playerid)
+	if player == nil {
+		c.JSON(404, structs.ErrorJson{
+			Error: "player not found",
+		})
+		return
+	}
 
 	c.JSON(200, player)
 }

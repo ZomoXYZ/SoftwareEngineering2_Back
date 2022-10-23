@@ -8,22 +8,21 @@ import (
 )
 
 func GetSelf(c *gin.Context) {
-	if !database.IsAuthorized(c) {
+	token, player := database.GetAuthorization(c)
+	if token == "" {
 		return
 	}
-	
-	//temp
-	var player = structs.TempGeneratePlayer()
 
 	c.JSON(200, player)
 }
 
 func SetSelf(c *gin.Context) {
-	if !database.IsAuthorized(c) {
+	token, player := database.GetAuthorization(c)
+	if token == "" {
 		return
 	}
 	
-	var requestBody structs.SelfRestBody
+	var requestBody structs.RestBodySelf
 
 	if err := c.BindJSON(&requestBody); err != nil {
 		return
@@ -36,8 +35,6 @@ func SetSelf(c *gin.Context) {
 		return
 	}
 
-	//temp
-	var player = structs.TempGeneratePlayer()
 	if (requestBody.Name != nil) {
 		player.Name = *requestBody.Name
 	}
@@ -45,5 +42,8 @@ func SetSelf(c *gin.Context) {
 		player.Picture = *requestBody.Picture
 	}
 
-	c.JSON(200, player)
+	database.UpdatePlayer(token, *player)
+	updatedPlayer := database.GetPlayerByToken(token)
+
+	c.JSON(200, updatedPlayer)
 }

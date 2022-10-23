@@ -5,6 +5,7 @@ import "github.com/gin-gonic/gin"
 func Initialize(r *gin.Engine) {
 	//generic/dev
 	r.GET("/ping", Ping)
+	r.GET("/pingauth", PingAuthorized)
 
 	//authorization
 	r.GET("/authorization", Authorization)
@@ -12,6 +13,7 @@ func Initialize(r *gin.Engine) {
 
 	//lobby
 	r.GET("/lobbylist", GetLobbyList)
+	r.POST("/lobby", CreateLobby)
 
 	//player
 	r.GET("/player/:playerid", GetPlayer)

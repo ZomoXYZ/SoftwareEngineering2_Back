@@ -1,6 +1,7 @@
 package endpoints
 
 import (
+	"edu/letu/wan/database"
 	"edu/letu/wan/structs"
 	"edu/letu/wan/util"
 
@@ -8,10 +9,10 @@ import (
 )
 
 func Authorization(c *gin.Context) {
-	//temp
-	var token = util.RandAll(32)
+	var token = util.GenerateToken()
 
-	// this will generate a randomized user, the client may change it immediately after with /self
+	player := structs.GeneratePlayer()
+	database.AddPlayer(token, player)
 
 	c.JSON(200, structs.AuthorizationToken{
 		Token: token,
@@ -25,8 +26,16 @@ func CheckAuthorization(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"token": requestBody.Token,
-		"valid": true,
-	})
+	player := database.GetPlayerByToken(requestBody.Token)
+	//ERROR sql: no rows in result set
+
+	if player == nil {
+		c.AbortWithStatusJSON(401, structs.ErrorJson{
+			Error: "Unauthorized",
+		})
+	} else {
+		c.JSON(200, structs.AuthorizationToken{
+			Token: requestBody.Token,
+		})
+	}
 }

@@ -11,7 +11,7 @@ type PlayerInfo struct {
 	Picture int `json:"picture" binding:"required"`
 }
 
-type SelfRestBody struct {
+type RestBodySelf struct {
 	Name *PlayerName `json:"name,omitempty"`
 	Picture *int `json:"picture,omitempty"`
 }

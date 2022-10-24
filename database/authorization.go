@@ -9,17 +9,15 @@ import (
 func GetAuthorization(c *gin.Context) (string, *structs.PlayerInfo) {
 	token := c.Request.Header.Get("Authorization")
 	if token == "" {
-		c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
+		c.AbortWithStatusJSON(401, structs.ErrorJson{Error: "Unauthorized"})
 		return "", nil
 	}
 
 	player := GetPlayerByToken(token)
 	if player == nil {
-		c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
+		c.AbortWithStatusJSON(401, structs.ErrorJson{Error: "Unauthorized"})
 		return "", nil
 	}
-
-	//check if token is expired
 
 	return token, player
 }

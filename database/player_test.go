@@ -35,24 +35,24 @@ func TestAddPlayer(t *testing.T) {
 		t.Error("Player by ID (Missing) does not match expected values")
 	}
 
-	foundPlayer = GetPlayerByToken("TOKEN")
+	foundPlayer = GetPlayerByToken("TOKEN", "UUID")
 	if !(reflect.DeepEqual(*foundPlayer, playerInfo)) {
 		t.Error("Player by Token does not match expected values")
 	}
 
-	foundPlayer = GetPlayerByToken("INVALID")
+	foundPlayer = GetPlayerByToken("INVALID", "UUID")
 	if foundPlayer != nil {
 		t.Error("Player by Token (Missing) does not match expected values")
 	}
 
-	foundPlayer = GetPlayerByUUID("UUID")
-	if !(reflect.DeepEqual(*foundPlayer, playerInfo)) {
-		t.Error("Player by UUID does not match expected values")
+	foundPlayer = GetPlayerByToken("TOKEN", "INVALID")
+	if foundPlayer != nil {
+		t.Error("Player by Token (Missing) does not match expected values")
 	}
 
-	foundPlayer = GetPlayerByUUID("INVALID")
+	foundPlayer = GetPlayerByToken("INVALID", "INVALID")
 	if foundPlayer != nil {
-		t.Error("Player by UUID (Missing) does not match expected values")
+		t.Error("Player by Token (Missing) does not match expected values")
 	}
 }
 
@@ -95,24 +95,14 @@ func TestAddPlayers(t *testing.T) {
 		t.Error("Player2 by ID does not match expected values")
 	}
 
-	foundPlayer = GetPlayerByToken("TOKEN_ONE")
+	foundPlayer = GetPlayerByToken("TOKEN_ONE", "UUID_ONE")
 	if !(reflect.DeepEqual(*foundPlayer, playerInfo1)) {
 		t.Error("Player1 by Token does not match expected values")
 	}
 
-	foundPlayer = GetPlayerByToken("TOKEN_TWO")
+	foundPlayer = GetPlayerByToken("TOKEN_TWO", "UUID_TWO")
 	if !(reflect.DeepEqual(*foundPlayer, playerInfo2)) {
 		t.Error("Player2 by Token does not match expected values")
-	}
-
-	foundPlayer = GetPlayerByUUID("UUID_ONE")
-	if !(reflect.DeepEqual(*foundPlayer, playerInfo1)) {
-		t.Error("Player1 by UUID does not match expected values")
-	}
-
-	foundPlayer = GetPlayerByUUID("UUID_TWO")
-	if !(reflect.DeepEqual(*foundPlayer, playerInfo2)) {
-		t.Error("Player2 by UUID does not match expected values")
 	}
 }
 
@@ -164,9 +154,14 @@ func TestAddPlayerDuplicateToken(t *testing.T) {
 		t.Error("Player by ID (Missing) does not match expected values", foundPlayer)
 	}
 
-	foundPlayer = GetPlayerByToken("TOKEN")
+	foundPlayer = GetPlayerByToken("TOKEN", "UUID_ONE")
 	if !(reflect.DeepEqual(*foundPlayer, playerInfo1)) {
 		t.Error("Player by Token does not match expected values")
+	}
+
+	foundPlayer = GetPlayerByToken("TOKEN", "UUID_TWO")
+	if foundPlayer != nil {
+		t.Error("Player by Token (Missing) does not match expected values")
 	}
 }
 
@@ -218,9 +213,14 @@ func TestAddPlayerDuplicateUUID(t *testing.T) {
 		t.Error("Player by ID does not match expected values", foundPlayer)
 	}
 
-	foundPlayer = GetPlayerByUUID("UUID")
+	foundPlayer = GetPlayerByToken("TOKEN_ONE", "UUID")
+	if foundPlayer != nil {
+		t.Error("Player by Token (Missing) does not match expected values")
+	}
+
+	foundPlayer = GetPlayerByToken("TOKEN_TWO", "UUID")
 	if !(reflect.DeepEqual(*foundPlayer, playerInfo2)) {
-		t.Error("Player by UUID does not match expected values", foundPlayer)
+		t.Error("Player by Token does not match expected values")
 	}
 }
 
@@ -267,12 +267,12 @@ func TestAddPlayerDuplicateID(t *testing.T) {
 		t.Error("Player by ID does not match expected values")
 	}
 
-	foundPlayer = GetPlayerByToken("TOKEN_ONE")
+	foundPlayer = GetPlayerByToken("TOKEN_ONE", "UUID_ONE")
 	if !(reflect.DeepEqual(*foundPlayer, playerInfo1)) {
 		t.Error("Player by Token does not match expected values")
 	}
 
-	foundPlayer = GetPlayerByID("TOKEN_TWO")
+	foundPlayer = GetPlayerByToken("TOKEN_TWO", "UUID_TWO")
 	if foundPlayer != nil {
 		t.Error("Player by Token (Missing) does not match expected values")
 	}

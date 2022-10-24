@@ -17,7 +17,7 @@ func GetSelf(c *gin.Context) {
 }
 
 func SetSelf(c *gin.Context) {
-	token, _, player := database.GetAuthorization(c)
+	token, uuid, player := database.GetAuthorization(c)
 	if token == "" {
 		return
 	}
@@ -43,7 +43,7 @@ func SetSelf(c *gin.Context) {
 	}
 
 	database.UpdatePlayer(token, player)
-	updatedPlayer := database.GetPlayerByToken(token)
+	updatedPlayer := database.GetPlayerByToken(token, uuid)
 
 	c.JSON(200, updatedPlayer)
 }

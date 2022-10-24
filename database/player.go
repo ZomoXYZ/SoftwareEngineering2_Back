@@ -47,10 +47,7 @@ func AddPlayer(token, uuid string, player structs.PlayerInfo) bool {
 	db := OpenSQLite()
 	defer db.Close()
 
-	foundPlayer := GetPlayerByUUID(uuid)
-	if foundPlayer != nil {
-		RemovePlayer(foundPlayer)
-	}
+	RemovePlayerByUUID(uuid)
 
 	if playerExists(db, token, uuid, player.ID) {
 		return false
@@ -83,6 +80,28 @@ const (
 	playerByUUID queryType = "UUID"
 	playerByToken queryType = "token"
 )
+
+func rowToPlayer(row *sql.Row) *structs.PlayerInfo {
+	//variables to store player info
+	var id string
+	var name_adjective, name_noun, picture int
+
+	//query sql
+	err := row.Scan(&id, &name_adjective, &name_noun, &picture)
+	if err == sql.ErrNoRows {
+		return nil
+	}
+
+	//return player info
+	return &structs.PlayerInfo{
+		ID: id,
+		Name: structs.PlayerName{
+			Adjective: name_adjective,
+			Noun: name_noun,
+		},
+		Picture: picture,
+	}
+}
 
 // gets a player from the database WHERE query = value
 // i.e. getPlayer("id", "1234") will return the player with id 1234
@@ -118,15 +137,28 @@ func getPlayer(query queryType, value string) *structs.PlayerInfo {
 }
 
 func GetPlayerByID(id string) *structs.PlayerInfo {
-	return getPlayer(playerByID, id)
+	db := OpenSQLite()
+	defer db.Close()
+
+	sqlStmt := `
+		SELECT id, name_adjective, name_noun, picture
+			FROM wan
+			WHERE id = ?;`
+
+	return rowToPlayer(db.QueryRow(sqlStmt, id))
 }
 
-func GetPlayerByToken(token string) *structs.PlayerInfo {
-	return getPlayer(playerByToken, token)
-}
+func GetPlayerByToken(token, uuid string) *structs.PlayerInfo {
+	db := OpenSQLite()
+	defer db.Close()
 
-func GetPlayerByUUID(uuid string) *structs.PlayerInfo {
-	return getPlayer(playerByUUID, uuid)
+	sqlStmt := `
+		SELECT id, name_adjective, name_noun, picture
+			FROM wan
+			WHERE token = ?
+			AND uuid = ?;`
+
+	return rowToPlayer(db.QueryRow(sqlStmt, token, uuid))
 }
 
 func UpdatePlayer(token string, player *structs.PlayerInfo) {
@@ -146,14 +178,14 @@ func UpdatePlayer(token string, player *structs.PlayerInfo) {
 	}
 }
 
-func RemovePlayer(player *structs.PlayerInfo) {
+func RemovePlayerByUUID(uuid string) {
 	db := OpenSQLite()
 	defer db.Close()
 
 	sqlStmt := `
 		DELETE FROM wan
-			WHERE id = ?;`
-	_, err := db.Exec(sqlStmt, player.ID)
+			WHERE uuid = ?;`
+	_, err := db.Exec(sqlStmt, uuid)
 	
 	if err != nil {
 		log.Fatal(err)

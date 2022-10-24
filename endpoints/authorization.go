@@ -26,13 +26,15 @@ func Authorization(c *gin.Context) {
 }
 
 func CheckAuthorization(c *gin.Context) {
+	_, uuid := database.GetAuthHeaders(c)
+
 	var requestBody structs.AuthorizationToken
 
 	if err := c.BindJSON(&requestBody); err != nil {
 		return
 	}
 
-	player := database.GetPlayerByToken(requestBody.Token)
+	player := database.GetPlayerByToken(requestBody.Token, uuid)
 	//ERROR sql: no rows in result set
 
 	if player == nil {

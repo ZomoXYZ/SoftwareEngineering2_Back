@@ -26,7 +26,7 @@ func GetAuthorization(c *gin.Context) (string, string, *structs.PlayerInfo) {
 		return "", "", nil
 	}
 
-	player := GetPlayerByToken(token)
+	player := GetPlayerByToken(token, uuid)
 
 	return token, uuid, player
 }

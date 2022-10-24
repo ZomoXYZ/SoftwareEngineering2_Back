@@ -27,7 +27,7 @@ func OpenSQLite() *sql.DB {
 				name_adjective INTEGER NOT NULL,
 				name_noun INTEGER NOT NULL,
 				picture INTEGER NOT NULL,
-				PRIMARY KEY (id, token)
+				PRIMARY KEY (uuid, id, token)
 			);
 		`)
 		if err != nil {

@@ -17,9 +17,12 @@ func LobbyCode() string {
     for i := range b {
         b[i] = lobbyCodeRunes[rand.Intn(len(lobbyCodeRunes))]
     }
-    return string(b)
+    code := string(b)
+    if IsProfane(code) {
+        return LobbyCode()
+    }
+    return code
 }
-//TODO should we ensure the output is never explicit?
 
 func GenerateToken() string {
     b := make([]byte, 32)

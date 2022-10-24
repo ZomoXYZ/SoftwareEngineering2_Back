@@ -19,10 +19,7 @@ func ClearPlayerTable() {
 	}
 }
 
-func playerExists(token, id string) bool {
-	db := OpenSQLite()
-	defer db.Close()
-
+func playerExists(db *sql.DB, token, id string) bool {
 	sqlStmt := "SELECT id FROM wan WHERE token = ? OR id = ?;"
 	err := db.QueryRow(sqlStmt, token, id).Scan()
 
@@ -33,7 +30,7 @@ func AddPlayer(token string, player structs.PlayerInfo) bool {
 	db := OpenSQLite()
 	defer db.Close()
 
-	if playerExists(token, player.ID) {
+	if playerExists(db, token, player.ID) {
 		return false
 	}
 

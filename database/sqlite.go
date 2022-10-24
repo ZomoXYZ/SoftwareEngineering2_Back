@@ -13,9 +13,11 @@ func OpenSQLite() *sql.DB {
 	}
 
 	//create table if it doesn't exist
-	err = db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='wan';`).Scan()
+	err = db.QueryRow(`
+		SELECT name FROM sqlite_master
+			WHERE type='table'
+			AND name='wan';`).Scan()
 	if err == sql.ErrNoRows {
-
 		_, err = db.Exec(`
 			CREATE TABLE wan (
 				id TEXT NOT NULL,
@@ -30,11 +32,12 @@ func OpenSQLite() *sql.DB {
 		if err != nil {
 			log.Fatal(err)
 		}
-
 	}
 
 	//remove expired tokens
-	_, err = db.Exec(`DELETE FROM wan WHERE expires < datetime('now');`)
+	_, err = db.Exec(`
+		DELETE FROM wan
+			WHERE expires < datetime('now');`)
 	if err != nil {
 		log.Fatal(err)
 	}

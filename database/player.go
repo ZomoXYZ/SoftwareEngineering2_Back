@@ -3,7 +3,6 @@ package database
 import (
 	"database/sql"
 	"edu/letu/wan/structs"
-	"fmt"
 	"log"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -73,14 +72,6 @@ func AddPlayer(token, uuid string, player structs.PlayerInfo) bool {
 	return true
 }
 
-
-type queryType string
-const (
-	playerByID queryType = "id"
-	playerByUUID queryType = "UUID"
-	playerByToken queryType = "token"
-)
-
 func rowToPlayer(row *sql.Row) *structs.PlayerInfo {
 	//variables to store player info
 	var id string
@@ -88,39 +79,6 @@ func rowToPlayer(row *sql.Row) *structs.PlayerInfo {
 
 	//query sql
 	err := row.Scan(&id, &name_adjective, &name_noun, &picture)
-	if err == sql.ErrNoRows {
-		return nil
-	}
-
-	//return player info
-	return &structs.PlayerInfo{
-		ID: id,
-		Name: structs.PlayerName{
-			Adjective: name_adjective,
-			Noun: name_noun,
-		},
-		Picture: picture,
-	}
-}
-
-// gets a player from the database WHERE query = value
-// i.e. getPlayer("id", "1234") will return the player with id 1234
-func getPlayer(query queryType, value string) *structs.PlayerInfo {
-	db := OpenSQLite()
-	defer db.Close()
-
-	//sql statement
-	sqlStmt := fmt.Sprintf(`
-		SELECT id, name_adjective, name_noun, picture
-			FROM wan WHERE %s = ?;
-	`, query)
-
-	//variables to store player info
-	var id string
-	var name_adjective, name_noun, picture int
-
-	//query sql
-	err := db.QueryRow(sqlStmt, value).Scan(&id, &name_adjective, &name_noun, &picture)
 	if err == sql.ErrNoRows {
 		return nil
 	}

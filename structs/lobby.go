@@ -22,11 +22,15 @@ type Lobby struct {
 func LobbyListFromLobbies(lobbies []Lobby) LobbyList {
     var lobbyList = LobbyList{ Lobbies: make([]LobbyInfo, 0) }
     for _, lobby := range lobbies {
-        lobbyList.Lobbies = append(lobbyList.Lobbies, LobbyInfo{
-            ID: lobby.ID,
-            Players: len(lobby.Players) + 1,
-            Locked: lobby.Password != "",
-        })
+        lobbyList.Lobbies = append(lobbyList.Lobbies, LobbyInfoFromLobby(lobby))
     }
     return lobbyList
+}
+
+func LobbyInfoFromLobby(lobby Lobby) LobbyInfo {
+    return LobbyInfo{
+        ID: lobby.ID,
+        Players: len(lobby.Players) + 1,
+        Locked: lobby.Password != "",
+    }
 }

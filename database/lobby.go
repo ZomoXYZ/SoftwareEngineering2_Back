@@ -7,9 +7,10 @@ import (
 
 var Lobbies = make(map[string]structs.Lobby)
 
-func AddLobby(host structs.PlayerInfo) {
+func AddLobby(host structs.PlayerInfo) structs.Lobby {
 	lobby := structs.GenerateLobby(host)
 	Lobbies[lobby.ID] = lobby
+	return lobby
 }
 
 func RemoveLobby(host structs.PlayerInfo) {

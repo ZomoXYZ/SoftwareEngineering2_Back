@@ -23,9 +23,12 @@ func GetLobbyList(c *gin.Context) {
 }
 
 func CreateLobby(c *gin.Context) {
-	if database.IsAuthorized(c) {
+	_, _, player := database.GetAuthorization(c)
+	if player == nil {
 		return
 	}
 
-	//TODO
+	lobby := database.AddLobby(*player)
+
+	c.JSON(200, structs.LobbyInfoFromLobby(lobby))
 }

@@ -8,7 +8,7 @@ import (
 )
 
 func GetSelf(c *gin.Context) {
-	token, player := database.GetAuthorization(c)
+	token, _, player := database.GetAuthorization(c)
 	if token == "" {
 		return
 	}
@@ -17,7 +17,7 @@ func GetSelf(c *gin.Context) {
 }
 
 func SetSelf(c *gin.Context) {
-	token, player := database.GetAuthorization(c)
+	token, _, player := database.GetAuthorization(c)
 	if token == "" {
 		return
 	}
@@ -42,7 +42,7 @@ func SetSelf(c *gin.Context) {
 		player.Picture = *requestBody.Picture
 	}
 
-	database.UpdatePlayer(token, *player)
+	database.UpdatePlayer(token, player)
 	updatedPlayer := database.GetPlayerByToken(token)
 
 	c.JSON(200, updatedPlayer)

@@ -13,28 +13,46 @@ func ClearPlayerTable() {
 	db := OpenSQLite()
 	defer db.Close()
 
-	_, err := db.Exec(`
-		DELETE FROM wan;`)
+	_, err := db.Exec(`DELETE FROM wan;`)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func playerExists(db *sql.DB, token, id string) bool {
+func AuthorizationExists(token, uuid string) bool {
+	db := OpenSQLite()
+	defer db.Close()
+
 	sqlStmt := `
 		SELECT id FROM wan 
 			WHERE token = ?
-			OR id = ?;`
-	err := db.QueryRow(sqlStmt, token, id).Scan()
+			AND uuid = ?;`
+	err := db.QueryRow(sqlStmt, token, uuid).Scan()
 
 	return err != sql.ErrNoRows
 }
 
-func AddPlayer(token string, player structs.PlayerInfo) bool {
+func playerExists(db *sql.DB, token, uuid, id string) bool {
+	sqlStmt := `
+		SELECT id FROM wan 
+			WHERE token = ?
+			OR uuid = ?
+			OR id = ?;`
+	err := db.QueryRow(sqlStmt, token, uuid, id).Scan()
+
+	return err != sql.ErrNoRows
+}
+
+func AddPlayer(token, uuid string, player structs.PlayerInfo) bool {
 	db := OpenSQLite()
 	defer db.Close()
 
-	if playerExists(db, token, player.ID) {
+	foundPlayer := GetPlayerByUUID(uuid)
+	if foundPlayer != nil {
+		RemovePlayer(foundPlayer)
+	}
+
+	if playerExists(db, token, uuid, player.ID) {
 		return false
 	}
 
@@ -42,15 +60,16 @@ func AddPlayer(token string, player structs.PlayerInfo) bool {
 		INSERT INTO wan (
 			expires,
 			token,
+			uuid,
 			id,
 			name_adjective,
 			name_noun,
 			picture
 		) VALUES (
 			datetime('now', '1 day'),
-			?, ?, ?, ?, ?
+			?, ?, ?, ?, ?, ?
 		);`
-	_, err := db.Exec(sqlStmt, token, player.ID, player.Name.Adjective, player.Name.Noun, player.Picture)
+	_, err := db.Exec(sqlStmt, token, uuid, player.ID, player.Name.Adjective, player.Name.Noun, player.Picture)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,8 +79,9 @@ func AddPlayer(token string, player structs.PlayerInfo) bool {
 
 type queryType string
 const (
-	byID queryType = "id"
-	byToken queryType = "token"
+	playerByID queryType = "id"
+	playerByUUID queryType = "UUID"
+	playerByToken queryType = "token"
 )
 
 // gets a player from the database WHERE query = value
@@ -98,14 +118,18 @@ func getPlayer(query queryType, value string) *structs.PlayerInfo {
 }
 
 func GetPlayerByID(id string) *structs.PlayerInfo {
-	return getPlayer(byID, id)
+	return getPlayer(playerByID, id)
 }
 
 func GetPlayerByToken(token string) *structs.PlayerInfo {
-	return getPlayer(byToken, token)
+	return getPlayer(playerByToken, token)
 }
 
-func UpdatePlayer(token string, player structs.PlayerInfo) {
+func GetPlayerByUUID(uuid string) *structs.PlayerInfo {
+	return getPlayer(playerByUUID, uuid)
+}
+
+func UpdatePlayer(token string, player *structs.PlayerInfo) {
 	db := OpenSQLite()
 	defer db.Close()
 
@@ -116,6 +140,20 @@ func UpdatePlayer(token string, player structs.PlayerInfo) {
 				picture = ?
 			WHERE token = ?;`
 	_, err := db.Exec(sqlStmt, player.Name.Adjective, player.Name.Noun, player.Picture, token)
+	
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func RemovePlayer(player *structs.PlayerInfo) {
+	db := OpenSQLite()
+	defer db.Close()
+
+	sqlStmt := `
+		DELETE FROM wan
+			WHERE id = ?;`
+	_, err := db.Exec(sqlStmt, player.ID)
 	
 	if err != nil {
 		log.Fatal(err)

@@ -19,7 +19,7 @@ func TestAddPlayer(t *testing.T) {
 	}
 
 	//add one player
-	AddPlayer("TOKEN", playerInfo)
+	AddPlayer("TOKEN", "UUID", playerInfo)
 
 	//initialize test variables
 	var foundPlayer *structs.PlayerInfo
@@ -43,6 +43,16 @@ func TestAddPlayer(t *testing.T) {
 	foundPlayer = GetPlayerByToken("INVALID")
 	if foundPlayer != nil {
 		t.Error("Player by Token (Missing) does not match expected values")
+	}
+
+	foundPlayer = GetPlayerByUUID("UUID")
+	if !(reflect.DeepEqual(*foundPlayer, playerInfo)) {
+		t.Error("Player by UUID does not match expected values")
+	}
+
+	foundPlayer = GetPlayerByUUID("INVALID")
+	if foundPlayer != nil {
+		t.Error("Player by UUID (Missing) does not match expected values")
 	}
 }
 
@@ -68,8 +78,8 @@ func TestAddPlayers(t *testing.T) {
 	}
 
 	//add players
-	AddPlayer("TOKEN_ONE", playerInfo1)
-	AddPlayer("TOKEN_TWO", playerInfo2)
+	AddPlayer("TOKEN_ONE", "UUID_ONE", playerInfo1)
+	AddPlayer("TOKEN_TWO", "UUID_TWO", playerInfo2)
 
 	//initialize test variables
 	var foundPlayer *structs.PlayerInfo
@@ -93,6 +103,16 @@ func TestAddPlayers(t *testing.T) {
 	foundPlayer = GetPlayerByToken("TOKEN_TWO")
 	if !(reflect.DeepEqual(*foundPlayer, playerInfo2)) {
 		t.Error("Player2 by Token does not match expected values")
+	}
+
+	foundPlayer = GetPlayerByUUID("UUID_ONE")
+	if !(reflect.DeepEqual(*foundPlayer, playerInfo1)) {
+		t.Error("Player1 by UUID does not match expected values")
+	}
+
+	foundPlayer = GetPlayerByUUID("UUID_TWO")
+	if !(reflect.DeepEqual(*foundPlayer, playerInfo2)) {
+		t.Error("Player2 by UUID does not match expected values")
 	}
 }
 
@@ -122,13 +142,13 @@ func TestAddPlayerDuplicateToken(t *testing.T) {
 	var foundPlayer *structs.PlayerInfo
 
 	//add one player
-	success = AddPlayer("TOKEN", playerInfo1)
+	success = AddPlayer("TOKEN", "UUID_ONE", playerInfo1)
 	if !success {
 		t.Error("Player add failed")
 	}
 
 	//add duplicate player
-	success = AddPlayer("TOKEN", playerInfo2)
+	success = AddPlayer("TOKEN", "UUID_TWO", playerInfo2)
 	if success {
 		t.Error("Duplicate Token was added")
 	}
@@ -147,6 +167,60 @@ func TestAddPlayerDuplicateToken(t *testing.T) {
 	foundPlayer = GetPlayerByToken("TOKEN")
 	if !(reflect.DeepEqual(*foundPlayer, playerInfo1)) {
 		t.Error("Player by Token does not match expected values")
+	}
+}
+
+func TestAddPlayerDuplicateUUID(t *testing.T) {
+	ClearPlayerTable()
+
+	var playerInfo1 = structs.PlayerInfo{
+		ID: "1",
+		Name: structs.PlayerName{
+			Adjective: 1,
+			Noun:      2,
+		},
+		Picture: 3,
+	}
+
+	var playerInfo2 = structs.PlayerInfo{
+		ID: "2",
+		Name: structs.PlayerName{
+			Adjective: 99,
+			Noun:      98,
+		},
+		Picture: 97,
+	}
+
+	//initialize test variables
+	var success bool
+	var foundPlayer *structs.PlayerInfo
+
+	//add one player
+	success = AddPlayer("TOKEN_ONE", "UUID", playerInfo1)
+	if !success {
+		t.Error("Player add failed")
+	}
+
+	//add duplicate player
+	success = AddPlayer("TOKEN_TWO", "UUID", playerInfo2)
+	if !success {
+		t.Error("Player add failed")
+	}
+
+	//check if getters work
+	foundPlayer = GetPlayerByID("1")
+	if foundPlayer != nil {
+		t.Error("Player by ID (Missing) does not match expected values")
+	}
+
+	foundPlayer = GetPlayerByID("2")
+	if !(reflect.DeepEqual(*foundPlayer, playerInfo2)) {
+		t.Error("Player by ID does not match expected values", foundPlayer)
+	}
+
+	foundPlayer = GetPlayerByUUID("UUID")
+	if !(reflect.DeepEqual(*foundPlayer, playerInfo2)) {
+		t.Error("Player by UUID does not match expected values", foundPlayer)
 	}
 }
 
@@ -176,13 +250,13 @@ func TestAddPlayerDuplicateID(t *testing.T) {
 	var foundPlayer *structs.PlayerInfo
 
 	//add one player
-	success = AddPlayer("TOKEN_ONE", playerInfo1)
+	success = AddPlayer("TOKEN_ONE", "UUID_ONE", playerInfo1)
 	if !success {
 		t.Error("Player add failed")
 	}
 
 	//add duplicate player
-	success = AddPlayer("TOKEN_TWO", playerInfo2)
+	success = AddPlayer("TOKEN_TWO", "UUID_TWO", playerInfo2)
 	if success {
 		t.Error("Duplicate ID was added")
 	}
@@ -226,13 +300,13 @@ func TestUpdatePlayer(t *testing.T) {
 	}
 
 	//add one player
-	AddPlayer("TOKEN", playerInfo)
+	AddPlayer("TOKEN", "UUID", playerInfo)
 
 	//initialize test variables
 	var foundPlayer *structs.PlayerInfo
 
 	//update player
-	UpdatePlayer("TOKEN", playerInfoNew)
+	UpdatePlayer("TOKEN", &playerInfoNew)
 
 	//check player value is still correct
 	foundPlayer = GetPlayerByID("1")

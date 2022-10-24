@@ -6,23 +6,32 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetAuthorization(c *gin.Context) (string, *structs.PlayerInfo) {
+func GetAuthHeaders(c *gin.Context) (string, string) {
 	token := c.Request.Header.Get("Authorization")
-	if token == "" {
+	uuid := c.Request.Header.Get("UUID")
+
+	return token, uuid
+}
+
+func GetAuthorization(c *gin.Context) (string, string, *structs.PlayerInfo) {
+	token, uuid := GetAuthHeaders(c)
+	if token == "" || uuid == "" {
 		c.AbortWithStatusJSON(401, structs.ErrorJson{Error: "Unauthorized"})
-		return "", nil
+		return "", "", nil
+	}
+
+	exists := AuthorizationExists(token, uuid)
+	if !exists {
+		c.AbortWithStatusJSON(401, structs.ErrorJson{Error: "Unauthorized"})
+		return "", "", nil
 	}
 
 	player := GetPlayerByToken(token)
-	if player == nil {
-		c.AbortWithStatusJSON(401, structs.ErrorJson{Error: "Unauthorized"})
-		return "", nil
-	}
 
-	return token, player
+	return token, uuid, player
 }
 
 func IsAuthorized(c *gin.Context) bool {
-	token, _ := GetAuthorization(c)
-	return token != ""
+	token, uuid, _ := GetAuthorization(c)
+	return token != "" && uuid != ""
 }

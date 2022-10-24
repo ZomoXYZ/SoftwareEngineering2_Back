@@ -20,6 +20,7 @@ func OpenSQLite() *sql.DB {
 	if err == sql.ErrNoRows {
 		_, err = db.Exec(`
 			CREATE TABLE wan (
+				uuid TEXT NOT NULL,
 				id TEXT NOT NULL,
 				token TEXT NOT NULL,
 				expires TEXT NOT NULL,

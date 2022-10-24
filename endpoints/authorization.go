@@ -11,8 +11,14 @@ import (
 func Authorization(c *gin.Context) {
 	var token = util.GenerateToken()
 
+	_, uuid := database.GetAuthHeaders(c)
+	if uuid == "" {
+		c.AbortWithStatusJSON(401, structs.ErrorJson{Error: "Unauthorized"})
+		return
+	}
+
 	player := structs.GeneratePlayer()
-	database.AddPlayer(token, player)
+	database.AddPlayer(token, uuid, player)
 
 	c.JSON(200, structs.AuthorizationToken{
 		Token: token,
@@ -33,9 +39,10 @@ func CheckAuthorization(c *gin.Context) {
 		c.AbortWithStatusJSON(401, structs.ErrorJson{
 			Error: "Unauthorized",
 		})
-	} else {
-		c.JSON(200, structs.AuthorizationToken{
-			Token: requestBody.Token,
-		})
+		return
 	}
+
+	c.JSON(200, structs.AuthorizationToken{
+		Token: requestBody.Token,
+	})
 }

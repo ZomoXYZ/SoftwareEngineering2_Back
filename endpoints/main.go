@@ -25,4 +25,11 @@ func Initialize(r *gin.Engine) {
 	//meta
 	r.GET("/meta/names", MetaNames)
 	r.GET("/meta/pictures", MetaPictures)
+
+	//teapot
+	r.GET("/teapot", Teapot)
+}
+
+func Teapot(c *gin.Context) {
+	c.AbortWithStatus(418)
 }

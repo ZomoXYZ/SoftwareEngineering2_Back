@@ -7,7 +7,7 @@ import (
 )
 
 func MetaNames(c *gin.Context) {
-	if database.IsAuthorized(c) {
+	if !database.IsAuthorized(c) {
 		return
 	}
 	
@@ -22,7 +22,7 @@ func MetaNames(c *gin.Context) {
 }
 
 func MetaPictures(c *gin.Context) {
-	if database.IsAuthorized(c) {
+	if !database.IsAuthorized(c) {
 		return
 	}
 

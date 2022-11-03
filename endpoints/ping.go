@@ -13,7 +13,7 @@ func Ping(c *gin.Context) {
 }
 
 func PingAuthorized(c *gin.Context) {
-	if database.IsAuthorized(c) {
+	if !database.IsAuthorized(c) {
 		return
 	}
 	

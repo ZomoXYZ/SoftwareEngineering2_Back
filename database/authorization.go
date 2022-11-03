@@ -2,6 +2,7 @@ package database
 
 import (
 	"edu/letu/wan/structs"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -33,5 +34,6 @@ func GetAuthorization(c *gin.Context) (string, string, *structs.PlayerInfo) {
 
 func IsAuthorized(c *gin.Context) bool {
 	token, uuid, _ := GetAuthorization(c)
+	fmt.Println(token, uuid)
 	return token != "" && uuid != ""
 }

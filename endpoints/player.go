@@ -8,7 +8,7 @@ import (
 )
 
 func GetPlayer(c *gin.Context) {
-	if database.IsAuthorized(c) {
+	if !database.IsAuthorized(c) {
 		return
 	}
 	

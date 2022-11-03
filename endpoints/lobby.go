@@ -9,7 +9,7 @@ import (
 )
 
 func GetLobbyList(c *gin.Context) {
-	if database.IsAuthorized(c) {
+	if !database.IsAuthorized(c) {
 		return
 	}
 

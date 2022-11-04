@@ -12,8 +12,14 @@ func Initialize(r *gin.Engine) {
 	r.POST("/authorization", CheckAuthorization)
 
 	//lobby
-	r.GET("/lobbylist", GetLobbyList)
+	r.GET("/lobbylist", GetLobbyListLatest)
+	r.GET("/lobbylist/:timestamp", GetLobbyListAfter)
 	r.POST("/lobby", CreateLobby)
+
+	// TODO remove these
+	//temp
+	r.GET("/createlobbies", TempCreateLobbies)
+	r.GET("/deletelobbies", TempDeleteLobbies)
 
 	//player
 	r.GET("/player/:playerid", GetPlayer)

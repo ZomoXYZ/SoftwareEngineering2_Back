@@ -3,12 +3,14 @@ package database
 import (
 	"edu/letu/wan/structs"
 	"sort"
+	"time"
 )
 
 var Lobbies = make(map[string]structs.Lobby)
 
 func AddLobby(host structs.PlayerInfo) structs.Lobby {
 	lobby := structs.GenerateLobby(host)
+	// TODO check if user is already a host, give them that lobby if so
 	Lobbies[lobby.ID] = lobby
 	return lobby
 }
@@ -34,7 +36,17 @@ func GetAvailableLobbies() []structs.Lobby {
 
 	//sort by time created
 	sort.Slice(lobbyArray, func(i, j int) bool {
-		return lobbyArray[i].CreatedAt < lobbyArray[j].CreatedAt
+		iCreatedAt, err := time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", lobbyArray[i].CreatedAt)
+		if err != nil {
+			// TODO do something else ? this shouldn't ever trigger
+			panic(err)
+		}
+		jCreatedAt, err := time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", lobbyArray[j].CreatedAt)
+		if err != nil {
+			// TODO do something else ? this shouldn't ever trigger
+			panic(err)
+		}
+		return iCreatedAt.After(jCreatedAt)
 	})
 
 	return lobbyArray

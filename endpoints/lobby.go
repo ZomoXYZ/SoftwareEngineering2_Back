@@ -3,7 +3,6 @@ package endpoints
 import (
 	"edu/letu/wan/database"
 	"edu/letu/wan/structs"
-	"fmt"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -25,9 +24,6 @@ func GetLobbyListLatest(c *gin.Context) {
 
 	lobbies = lobbies[:endIndex]
 	var lobbyList = structs.LobbyListFromLobbies(lobbies)
-	
-	// fmt.Println(lobbyList.Lobbies)
-	// fmt.Println(lobbyList)
 
 	c.JSON(200, lobbyList)
 }
@@ -40,7 +36,6 @@ func GetLobbyListAfter(c *gin.Context) {
 	//2022-11-04 15:13:30.024317 +0000 UTC
 	timestamp, err := time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", c.Param("timestamp"))
 	if err != nil {
-		fmt.Println(err.Error())
 		c.AbortWithStatus(400)
 		return
 	}
@@ -48,9 +43,7 @@ func GetLobbyListAfter(c *gin.Context) {
 	// find the next oldest lobby than the timestamp
 	var lobbies = database.GetAvailableLobbies()
 	var startIndex = -1
-	fmt.Println("lobby length", len(lobbies))
 	for i, lobby := range lobbies {
-		fmt.Println(i, c.Param("timestamp"), lobby.CreatedAt)
 		createdAt, err := time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", lobby.CreatedAt)
 		if err != nil {
 			c.AbortWithStatus(500)
@@ -73,14 +66,10 @@ func GetLobbyListAfter(c *gin.Context) {
 	if len(lobbies) < endIndex {
 		endIndex = len(lobbies)
 	}
-	fmt.Println(startIndex, endIndex)
 
 	//slice lobby array and return
 	lobbies = lobbies[startIndex:endIndex]
 	var lobbyList = structs.LobbyListFromLobbies(lobbies)
-	
-	// fmt.Println(lobbyList.Lobbies)
-	// fmt.Println(lobbyList)
 
 	c.JSON(200, lobbyList)
 }

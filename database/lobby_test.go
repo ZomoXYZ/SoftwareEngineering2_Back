@@ -20,7 +20,7 @@ func TestAddLobby(t *testing.T) {
 	Lobbies = make(map[string]structs.Lobby)
 
 	// create a player
-	host := structs.PlayerInfo{
+	host := structs.Player{
 		ID: "123",
 		Name: structs.PlayerName{
 			Adjective: 1,
@@ -42,7 +42,7 @@ func TestGetLobby(t *testing.T) {
 	Lobbies = make(map[string]structs.Lobby)
 
 	// create a player
-	host := structs.PlayerInfo{
+	host := structs.Player{
 		ID: "123",
 		Name: structs.PlayerName{
 			Adjective: 1,

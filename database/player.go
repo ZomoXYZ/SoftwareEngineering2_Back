@@ -42,7 +42,7 @@ func playerExists(db *sql.DB, token, uuid, id string) bool {
 	return err != sql.ErrNoRows
 }
 
-func AddPlayer(token, uuid string, player structs.PlayerInfo) bool {
+func AddPlayer(token, uuid string, player structs.Player) bool {
 	db := OpenSQLite()
 	defer db.Close()
 
@@ -72,7 +72,7 @@ func AddPlayer(token, uuid string, player structs.PlayerInfo) bool {
 	return true
 }
 
-func rowToPlayer(row *sql.Row) *structs.PlayerInfo {
+func rowToPlayer(row *sql.Row) *structs.Player {
 	//variables to store player info
 	var id string
 	var name_adjective, name_noun, picture int
@@ -84,7 +84,7 @@ func rowToPlayer(row *sql.Row) *structs.PlayerInfo {
 	}
 
 	//return player info
-	return &structs.PlayerInfo{
+	return &structs.Player{
 		ID: id,
 		Name: structs.PlayerName{
 			Adjective: name_adjective,
@@ -94,7 +94,7 @@ func rowToPlayer(row *sql.Row) *structs.PlayerInfo {
 	}
 }
 
-func GetPlayerByID(id string) *structs.PlayerInfo {
+func GetPlayerByID(id string) *structs.Player {
 	db := OpenSQLite()
 	defer db.Close()
 
@@ -106,7 +106,7 @@ func GetPlayerByID(id string) *structs.PlayerInfo {
 	return rowToPlayer(db.QueryRow(sqlStmt, id))
 }
 
-func GetPlayerByToken(token, uuid string) *structs.PlayerInfo {
+func GetPlayerByToken(token, uuid string) *structs.Player {
 	db := OpenSQLite()
 	defer db.Close()
 
@@ -119,7 +119,7 @@ func GetPlayerByToken(token, uuid string) *structs.PlayerInfo {
 	return rowToPlayer(db.QueryRow(sqlStmt, token, uuid))
 }
 
-func UpdatePlayer(token string, player *structs.PlayerInfo) {
+func UpdatePlayer(token string, player *structs.Player) {
 	db := OpenSQLite()
 	defer db.Close()
 

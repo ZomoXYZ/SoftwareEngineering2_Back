@@ -14,7 +14,7 @@ func GetAuthHeaders(c *gin.Context) (string, string) {
 	return token, uuid
 }
 
-func GetAuthorization(c *gin.Context) (string, string, *structs.PlayerInfo) {
+func GetAuthorization(c *gin.Context) (string, string, *structs.Player) {
 	token, uuid := GetAuthHeaders(c)
 	if token == "" || uuid == "" {
 		c.AbortWithStatusJSON(401, structs.ErrorJson{Error: "Unauthorized"})

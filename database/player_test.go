@@ -9,7 +9,7 @@ import (
 func TestAddPlayer(t *testing.T) {
 	ClearPlayerTable()
 
-	var playerInfo = structs.PlayerInfo{
+	var playerInfo = structs.Player{
 		ID: "1",
 		Name: structs.PlayerName{
 			Adjective: 1,
@@ -22,7 +22,7 @@ func TestAddPlayer(t *testing.T) {
 	AddPlayer("TOKEN", "UUID", playerInfo)
 
 	//initialize test variables
-	var foundPlayer *structs.PlayerInfo
+	var foundPlayer *structs.Player
 
 	//check if getters work
 	foundPlayer = GetPlayerByID("1")
@@ -59,7 +59,7 @@ func TestAddPlayer(t *testing.T) {
 func TestAddPlayers(t *testing.T) {
 	ClearPlayerTable()
 
-	var playerInfo1 = structs.PlayerInfo{
+	var playerInfo1 = structs.Player{
 		ID: "1",
 		Name: structs.PlayerName{
 			Adjective: 1,
@@ -68,7 +68,7 @@ func TestAddPlayers(t *testing.T) {
 		Picture: 3,
 	}
 
-	var playerInfo2 = structs.PlayerInfo{
+	var playerInfo2 = structs.Player{
 		ID: "2",
 		Name: structs.PlayerName{
 			Adjective: 99,
@@ -82,7 +82,7 @@ func TestAddPlayers(t *testing.T) {
 	AddPlayer("TOKEN_TWO", "UUID_TWO", playerInfo2)
 
 	//initialize test variables
-	var foundPlayer *structs.PlayerInfo
+	var foundPlayer *structs.Player
 
 	//check if getters work
 	foundPlayer = GetPlayerByID("1")
@@ -109,7 +109,7 @@ func TestAddPlayers(t *testing.T) {
 func TestAddPlayerDuplicateToken(t *testing.T) {
 	ClearPlayerTable()
 
-	var playerInfo1 = structs.PlayerInfo{
+	var playerInfo1 = structs.Player{
 		ID: "1",
 		Name: structs.PlayerName{
 			Adjective: 1,
@@ -118,7 +118,7 @@ func TestAddPlayerDuplicateToken(t *testing.T) {
 		Picture: 3,
 	}
 
-	var playerInfo2 = structs.PlayerInfo{
+	var playerInfo2 = structs.Player{
 		ID: "2",
 		Name: structs.PlayerName{
 			Adjective: 99,
@@ -129,7 +129,7 @@ func TestAddPlayerDuplicateToken(t *testing.T) {
 
 	//initialize test variables
 	var success bool
-	var foundPlayer *structs.PlayerInfo
+	var foundPlayer *structs.Player
 
 	//add one player
 	success = AddPlayer("TOKEN", "UUID_ONE", playerInfo1)
@@ -168,7 +168,7 @@ func TestAddPlayerDuplicateToken(t *testing.T) {
 func TestAddPlayerDuplicateUUID(t *testing.T) {
 	ClearPlayerTable()
 
-	var playerInfo1 = structs.PlayerInfo{
+	var playerInfo1 = structs.Player{
 		ID: "1",
 		Name: structs.PlayerName{
 			Adjective: 1,
@@ -177,7 +177,7 @@ func TestAddPlayerDuplicateUUID(t *testing.T) {
 		Picture: 3,
 	}
 
-	var playerInfo2 = structs.PlayerInfo{
+	var playerInfo2 = structs.Player{
 		ID: "2",
 		Name: structs.PlayerName{
 			Adjective: 99,
@@ -188,7 +188,7 @@ func TestAddPlayerDuplicateUUID(t *testing.T) {
 
 	//initialize test variables
 	var success bool
-	var foundPlayer *structs.PlayerInfo
+	var foundPlayer *structs.Player
 
 	//add one player
 	success = AddPlayer("TOKEN_ONE", "UUID", playerInfo1)
@@ -227,7 +227,7 @@ func TestAddPlayerDuplicateUUID(t *testing.T) {
 func TestAddPlayerDuplicateID(t *testing.T) {
 	ClearPlayerTable()
 
-	var playerInfo1 = structs.PlayerInfo{
+	var playerInfo1 = structs.Player{
 		ID: "1",
 		Name: structs.PlayerName{
 			Adjective: 1,
@@ -236,7 +236,7 @@ func TestAddPlayerDuplicateID(t *testing.T) {
 		Picture: 3,
 	}
 
-	var playerInfo2 = structs.PlayerInfo{
+	var playerInfo2 = structs.Player{
 		ID: "1",
 		Name: structs.PlayerName{
 			Adjective: 99,
@@ -247,7 +247,7 @@ func TestAddPlayerDuplicateID(t *testing.T) {
 
 	//initialize test variables
 	var success bool
-	var foundPlayer *structs.PlayerInfo
+	var foundPlayer *structs.Player
 
 	//add one player
 	success = AddPlayer("TOKEN_ONE", "UUID_ONE", playerInfo1)
@@ -281,7 +281,7 @@ func TestAddPlayerDuplicateID(t *testing.T) {
 func TestUpdatePlayer(t *testing.T) {
 	ClearPlayerTable()
 
-	var playerInfo = structs.PlayerInfo{
+	var playerInfo = structs.Player{
 		ID: "1",
 		Name: structs.PlayerName{
 			Adjective: 1,
@@ -290,7 +290,7 @@ func TestUpdatePlayer(t *testing.T) {
 		Picture: 3,
 	}
 
-	var playerInfoNew = structs.PlayerInfo{
+	var playerInfoNew = structs.Player{
 		ID: "1",
 		Name: structs.PlayerName{
 			Adjective: 99,
@@ -303,7 +303,7 @@ func TestUpdatePlayer(t *testing.T) {
 	AddPlayer("TOKEN", "UUID", playerInfo)
 
 	//initialize test variables
-	var foundPlayer *structs.PlayerInfo
+	var foundPlayer *structs.Player
 
 	//update player
 	UpdatePlayer("TOKEN", &playerInfoNew)

@@ -8,14 +8,14 @@ import (
 
 var Lobbies = make(map[string]structs.Lobby)
 
-func AddLobby(host structs.PlayerInfo) structs.Lobby {
+func AddLobby(host structs.Player) structs.Lobby {
 	lobby := structs.GenerateLobby(host)
 	// TODO check if user is already a host, give them that lobby if so
 	Lobbies[lobby.ID] = lobby
 	return lobby
 }
 
-func RemoveLobby(host structs.PlayerInfo) {
+func RemoveLobby(host structs.Player) {
 	delete(Lobbies, host.ID)
 }
 
@@ -58,13 +58,13 @@ func UpdateLobbyPassword(lobbyid string, password string) {
 	Lobbies[lobbyid] = lobby
 }
 
-func JoinLobby(lobbyid string, player structs.PlayerInfo) {
+func JoinLobby(lobbyid string, player structs.Player) {
 	lobby := Lobbies[lobbyid]
 	lobby.Players = append(lobby.Players, player.ID)
 	Lobbies[lobbyid] = lobby
 }
 
-func LeaveLobby(lobbyid string, player structs.PlayerInfo) {
+func LeaveLobby(lobbyid string, player structs.Player) {
 	lobby := Lobbies[lobbyid]
 	for i, id := range lobby.Players {
 		if id == player.ID {

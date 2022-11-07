@@ -5,7 +5,7 @@ type PlayerName struct {
 	Noun int `json:"noun" binding:"required"`
 }
 
-type PlayerInfo struct {
+type Player struct {
 	ID string `json:"id" binding:"required"`
 	Name PlayerName `json:"name" binding:"required"`
 	Picture int `json:"picture" binding:"required"`

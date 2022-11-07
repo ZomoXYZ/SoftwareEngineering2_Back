@@ -10,7 +10,7 @@ import (
 
 var nodeIndex int64 = 0
 
-func GeneratePlayer() PlayerInfo {
+func GeneratePlayer() Player {
 	node, err := snowflake.NewNode(nodeIndex)
 	nodeIndex++;
 	if err != nil {
@@ -23,7 +23,7 @@ func GeneratePlayer() PlayerInfo {
 	var nameNoun = rand.Intn(100)
 	var picture = rand.Intn(100)
 
-	return PlayerInfo{
+	return Player{
 		ID: playerid.String(),
 		Name: PlayerName{
 			Adjective: nameAdj,
@@ -33,7 +33,7 @@ func GeneratePlayer() PlayerInfo {
 	}
 }
 
-func GenerateLobby(host PlayerInfo) Lobby {
+func GenerateLobby(host Player) Lobby {
 	node, err := snowflake.NewNode(nodeIndex)
 	nodeIndex++;
 	if err != nil {

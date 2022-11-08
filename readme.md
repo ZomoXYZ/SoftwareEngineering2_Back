@@ -4,7 +4,7 @@
 ## Docker Run
 
 ```bash
-$ docker-compose up
+$ docker-compose up --build
 ```
 
 add the `-d` flag to run as a daemon

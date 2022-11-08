@@ -58,6 +58,8 @@ func connectPlayer(conn *websocket.Conn) *structs.Player {
 		return nil
 	}
 
+	conn.WriteMessage(mt, []byte("Ok"))
+
 	return player
 }
 
@@ -98,6 +100,8 @@ func connectLobby(conn *websocket.Conn, player *structs.Player) *structs.Lobby {
 	// }
 
 	database.JoinLobby(lobby.ID, *player)
+
+	conn.WriteMessage(mt, []byte("Ok"))
 
 	return lobby
 }

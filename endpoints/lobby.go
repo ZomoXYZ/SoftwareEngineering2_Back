@@ -3,6 +3,7 @@ package endpoints
 import (
 	"edu/letu/wan/database"
 	"edu/letu/wan/structs"
+	"fmt"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -83,6 +84,26 @@ func CreateLobby(c *gin.Context) {
 	lobby := database.AddLobby(*player)
 
 	c.JSON(200, structs.LobbyInfoFromLobby(lobby))
+}
+
+func GetLobbyFromCode(c *gin.Context) {
+	_, _, player := database.GetAuthorization(c.Request)
+	if player == nil {
+		return
+	}
+
+	fmt.Println("getting lobby from code")
+
+	code := c.Param("code")
+	lobby := database.GetLobbyFromCode(code)
+	if lobby == nil {
+		c.AbortWithStatus(404)
+		fmt.Println("no lobby")
+		return
+	}
+	fmt.Println("got lobby from code")
+
+	c.JSON(200, structs.LobbyInfoFromLobby(*lobby))
 }
 
 func TempCreateLobbies(c *gin.Context) {

@@ -19,6 +19,7 @@ func Initialize(r *gin.Engine) {
 	r.GET("/lobbylist", GetLobbyListLatest)
 	r.GET("/lobbylist/:timestamp", GetLobbyListAfter)
 	r.POST("/lobby", CreateLobby)
+	r.GET("/lobby/:code", GetLobbyFromCode)
 
 	// TODO remove these
 	//temp

@@ -11,8 +11,8 @@ func main() {
 	// read .env file
 	godotenv.Load()
 
-	// initialize REST endpoints
-	r := gin.Default()
-	endpoints.Initialize(r)
-	r.Run()
+	// initialize endpoints
+	router := gin.Default() // TODO don't use Default (also add support for .env port)
+	endpoints.Initialize(router)
+	router.Run()
 }

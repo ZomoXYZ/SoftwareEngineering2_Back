@@ -1,6 +1,10 @@
 package endpoints
 
-import "github.com/gin-gonic/gin"
+import (
+	"edu/letu/wan/endpoints/gameplay"
+
+	"github.com/gin-gonic/gin"
+)
 
 func Initialize(r *gin.Engine) {
 	//generic/dev
@@ -32,10 +36,11 @@ func Initialize(r *gin.Engine) {
 	r.GET("/meta/names", MetaNames)
 	r.GET("/meta/pictures", MetaPictures)
 
-	//teapot
-	r.GET("/teapot", Teapot)
-}
+	//websocket
+	r.GET("/ws", gameplay.WSConnection)
 
-func Teapot(c *gin.Context) {
-	c.AbortWithStatus(418)
+	//teapot
+	r.GET("/teapot", func (c *gin.Context) {
+		c.AbortWithStatus(418)
+	})
 }

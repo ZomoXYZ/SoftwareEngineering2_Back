@@ -19,6 +19,7 @@ type Lobby struct {
     Host string
     Players []string
     CreatedAt string
+    Started bool
 }
 
 func LobbyListFromLobbies(lobbies []Lobby) LobbyList {

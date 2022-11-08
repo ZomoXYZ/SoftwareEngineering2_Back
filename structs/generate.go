@@ -47,7 +47,8 @@ func GenerateLobby(host Player) Lobby {
 		Code: util.LobbyCode(),
 		Password: "",
 		Host: host.ID,
-		Players: []string{},
+		Players: []string{host.ID},
 		CreatedAt: time.Now().UTC().String(),
+		Started: false,
 	}
 }

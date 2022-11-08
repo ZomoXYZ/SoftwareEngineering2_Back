@@ -31,7 +31,11 @@ func GetAvailableLobbies() []structs.Lobby {
 	//array of all lobbies
 	lobbyArray := make([]structs.Lobby, 0, len(Lobbies))
 	for  _, value := range Lobbies {
-		lobbyArray = append(lobbyArray, value)
+		
+		// if lobby is not started and is not full, add to array
+		if !value.Started && len(value.Players) < 4 {
+			lobbyArray = append(lobbyArray, value)
+		}
 	}
 
 	//sort by time created
@@ -49,26 +53,34 @@ func GetAvailableLobbies() []structs.Lobby {
 		return iCreatedAt.After(jCreatedAt)
 	})
 
+
+
 	return lobbyArray
 }
 
 func UpdateLobbyPassword(lobbyid string, password string) {
-	lobby := Lobbies[lobbyid]
-	lobby.Password = password
-	Lobbies[lobbyid] = lobby
+	if lobby, ok := Lobbies[lobbyid]; ok {
+		lobby.Password = password
+		Lobbies[lobbyid] = lobby
+	}
 }
 
 func JoinLobby(lobbyid string, player structs.Player) {
-	lobby := Lobbies[lobbyid]
-	lobby.Players = append(lobby.Players, player.ID)
-	Lobbies[lobbyid] = lobby
+	if lobby, ok := Lobbies[lobbyid]; ok {
+		if len(lobby.Players) < 4 {
+			lobby.Players = append(lobby.Players, player.ID)
+			Lobbies[lobbyid] = lobby
+		}
+	}
 }
 
 func LeaveLobby(lobbyid string, player structs.Player) {
-	lobby := Lobbies[lobbyid]
-	for i, id := range lobby.Players {
-		if id == player.ID {
-			lobby.Players = append(lobby.Players[:i], lobby.Players[i+1:]...)
+	if lobby, ok := Lobbies[lobbyid]; ok {
+		for i, id := range lobby.Players {
+			if id == player.ID {
+				lobby.Players = append(lobby.Players[:i], lobby.Players[i+1:]...)
+				Lobbies[lobbyid] = lobby
+			}
 		}
 	}
 }

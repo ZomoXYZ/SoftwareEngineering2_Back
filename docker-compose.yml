@@ -12,7 +12,6 @@ services:
       - "${NGINX_PORT}:${NGINX_PORT}"
     environment:
       - NGINX_PORT=${NGINX_PORT}
-      - NGINX_PATH=${NGINX_PATH}
 volumes:
   nginxlog: {}
   weblog: {}

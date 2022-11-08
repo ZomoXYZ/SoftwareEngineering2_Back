@@ -2,6 +2,7 @@ package database
 
 import (
 	"edu/letu/wan/structs"
+	"fmt"
 	"sort"
 	"time"
 )
@@ -25,6 +26,16 @@ func GetLobby(lobbyid string) *structs.Lobby {
 		return nil
 	}
 	return &lobby
+}
+
+func GetLobbyFromCode(code string) *structs.Lobby {
+	for _, value := range Lobbies {
+		fmt.Println(code, value.Code)
+		if value.Code == code {
+			return &value
+		}
+	}
+	return nil
 }
 
 func GetAvailableLobbies() []structs.Lobby {

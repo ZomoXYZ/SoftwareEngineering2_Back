@@ -7,8 +7,9 @@ COPY . .
 # don't copy any database files
 RUN rm -f /*.db
 
-# required for gcc
-RUN apk add build-base
+# build-base is required for gcc
+# bash is just for debugging
+RUN apk add build-base bash
 
 RUN go mod download
 RUN go build -o main.o .

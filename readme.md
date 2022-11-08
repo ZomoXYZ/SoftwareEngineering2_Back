@@ -28,7 +28,3 @@ to test
 ```bash
 $ go test
 ```
-
-## Notes
-
-[Flag to build sqlite3 for android](https://github.com/mattn/go-sqlite3#android)

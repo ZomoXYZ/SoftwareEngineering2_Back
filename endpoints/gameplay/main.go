@@ -19,12 +19,18 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func readMessage(conn *websocket.Conn) (string, []string, int) {
+func readMessage(conn *websocket.Conn) (string, []string) {
 	mt, message, err := conn.ReadMessage()
 	if err != nil {
 		log.Println("read:", err)
-		conn.WriteMessage(mt, []byte("Error Reading Message"))
-		return "", []string{}, mt
+		conn.WriteMessage(websocket.TextMessage, []byte("Error Reading Message"))
+		return "", []string{}
+	}
+
+	if mt != websocket.TextMessage {
+		log.Println("weird websocket type:", mt)
+		conn.WriteMessage(websocket.TextMessage, []byte("Error Reading Message"))
+		return "", []string{}
 	}
 
 	// parse command
@@ -34,15 +40,15 @@ func readMessage(conn *websocket.Conn) (string, []string, int) {
 
 	log.Printf("recv command: %s\n     args: %s", command, strings.Join(args, " "))
 
-	return command, args, mt;
+	return command, args;
 }
 
 func connectPlayer(conn *websocket.Conn) *structs.Player {
-	command, args, mt := readMessage(conn)
+	command, args := readMessage(conn)
 
 	// first command must be authorization
 	if command != "authorization" || len(args) < 2 {
-		conn.WriteMessage(mt, []byte("Unauthorized"))
+		conn.WriteMessage(websocket.TextMessage, []byte("Unauthorized"))
 		conn.Close()
 		return nil
 	}
@@ -53,22 +59,22 @@ func connectPlayer(conn *websocket.Conn) *structs.Player {
 	// get player from database
 	player := database.GetAuthorizationPlayer(token, uuid)
 	if player == nil {
-		conn.WriteMessage(mt, []byte("Unauthorized"))
+		conn.WriteMessage(websocket.TextMessage, []byte("Unauthorized"))
 		conn.Close()
 		return nil
 	}
 
-	conn.WriteMessage(mt, []byte("Ok"))
+	conn.WriteMessage(websocket.TextMessage, []byte("Ok"))
 
 	return player
 }
 
 func connectLobby(conn *websocket.Conn, player *structs.Player) *structs.Lobby {
-	command, args, mt := readMessage(conn)
+	command, args := readMessage(conn)
 
 	// second command must be join lobby
 	if command != "join" || len(args) < 1 {
-		conn.WriteMessage(mt, []byte("Invalid Command"))
+		conn.WriteMessage(websocket.TextMessage, []byte("Invalid Command"))
 		conn.Close()
 		return nil
 	}
@@ -78,14 +84,14 @@ func connectLobby(conn *websocket.Conn, player *structs.Player) *structs.Lobby {
 	// get lobby from database
 	lobby := database.GetLobby(lobbyID)
 	if lobby == nil {
-		conn.WriteMessage(mt, []byte("Invalid Lobby"))
+		conn.WriteMessage(websocket.TextMessage, []byte("Invalid Lobby"))
 		conn.Close()
 		return nil
 	}
 
 	// make sure lobby can be joined
 	if len(lobby.Players) >= 4 {
-		conn.WriteMessage(mt, []byte("Lobby Full"))
+		conn.WriteMessage(websocket.TextMessage, []byte("Lobby Full"))
 		conn.Close()
 		return nil
 	}
@@ -101,7 +107,7 @@ func connectLobby(conn *websocket.Conn, player *structs.Player) *structs.Lobby {
 
 	database.JoinLobby(lobby.ID, *player)
 
-	conn.WriteMessage(mt, []byte("Ok"))
+	conn.WriteMessage(websocket.TextMessage, []byte("Ok"))
 
 	return lobby
 }
@@ -115,10 +121,10 @@ func playerInLobby(conn *websocket.Conn, player *structs.Player, lobby *structs.
 	// this for loop should listen for all 4 players at once, it'll choose which to listen to with structs.ActiveGame.Players[i].Conn
 
 	for {
-		command, args, mt := readMessage(conn)
+		command, args := readMessage(conn)
 
 		// write message
-		var err = conn.WriteMessage(mt, []byte(fmt.Sprintf("You sent command (%s) with args: %s", command, strings.Join(args, " "))))
+		var err = conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("You sent command (%s) with args: %s", command, strings.Join(args, " "))))
 		if err != nil {
 			log.Println("write:", err)
 			break

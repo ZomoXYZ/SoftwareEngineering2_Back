@@ -1,7 +1,6 @@
 package gameplay
 
 import (
-	"edu/letu/wan/database"
 	"edu/letu/wan/structs"
 	"fmt"
 	"log"
@@ -41,75 +40,6 @@ func readMessage(conn *websocket.Conn) (string, []string) {
 	log.Printf("recv command: %s\n     args: %s", command, strings.Join(args, " "))
 
 	return command, args;
-}
-
-func connectPlayer(conn *websocket.Conn) *structs.Player {
-	command, args := readMessage(conn)
-
-	// first command must be authorization
-	if command != "authorization" || len(args) < 2 {
-		conn.WriteMessage(websocket.TextMessage, []byte("Unauthorized"))
-		conn.Close()
-		return nil
-	}
-
-	var token = args[0]
-	var uuid = args[1]
-
-	// get player from database
-	player := database.GetAuthorizationPlayer(token, uuid)
-	if player == nil {
-		conn.WriteMessage(websocket.TextMessage, []byte("Unauthorized"))
-		conn.Close()
-		return nil
-	}
-
-	conn.WriteMessage(websocket.TextMessage, []byte("Ok"))
-
-	return player
-}
-
-func connectLobby(conn *websocket.Conn, player *structs.Player) *structs.Lobby {
-	command, args := readMessage(conn)
-
-	// second command must be join lobby
-	if command != "join" || len(args) < 1 {
-		conn.WriteMessage(websocket.TextMessage, []byte("Invalid Command"))
-		conn.Close()
-		return nil
-	}
-
-	var lobbyID = args[0]
-
-	// get lobby from database
-	lobby := database.GetLobby(lobbyID)
-	if lobby == nil {
-		conn.WriteMessage(websocket.TextMessage, []byte("Invalid Lobby"))
-		conn.Close()
-		return nil
-	}
-
-	// make sure lobby can be joined
-	if len(lobby.Players) >= 4 {
-		conn.WriteMessage(websocket.TextMessage, []byte("Lobby Full"))
-		conn.Close()
-		return nil
-	}
-
-	// TODO either we let people join a game in progress and remove the following code, or don't let people join mid game and add a second flag to the lobby of Starting, Starting would let players join and Started would say the game is actually in progress
-
-	// if lobby.Started {
-	// 	log.Println("read:", err)
-	// 	c.WriteMessage(mt, []byte("Lobby Started"))
-	// 	c.Close()
-	// 	return nil
-	// }
-
-	database.JoinLobby(lobby.ID, *player)
-
-	conn.WriteMessage(websocket.TextMessage, []byte("Ok"))
-
-	return lobby
 }
 
 func playerInLobby(conn *websocket.Conn, player *structs.Player, lobby *structs.Lobby) {

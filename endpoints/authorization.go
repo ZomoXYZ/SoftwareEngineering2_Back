@@ -11,7 +11,7 @@ import (
 func Authorization(c *gin.Context) {
 	var token = util.GenerateToken()
 
-	_, uuid := database.GetAuthHeaders(c)
+	_, uuid := database.GetAuthHeaders(c.Request)
 	if uuid == "" {
 		c.AbortWithStatusJSON(401, structs.ErrorJson{Error: "Unauthorized"})
 		return
@@ -26,7 +26,7 @@ func Authorization(c *gin.Context) {
 }
 
 func CheckAuthorization(c *gin.Context) {
-	_, uuid := database.GetAuthHeaders(c)
+	_, uuid := database.GetAuthHeaders(c.Request)
 
 	var requestBody structs.AuthorizationToken
 

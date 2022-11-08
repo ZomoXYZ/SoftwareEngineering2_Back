@@ -75,7 +75,7 @@ func GetLobbyListAfter(c *gin.Context) {
 }
 
 func CreateLobby(c *gin.Context) {
-	_, _, player := database.GetAuthorization(c)
+	_, _, player := database.GetAuthorization(c.Request)
 	if player == nil {
 		return
 	}

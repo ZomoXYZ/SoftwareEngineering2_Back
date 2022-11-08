@@ -8,7 +8,7 @@ import (
 )
 
 func GetSelf(c *gin.Context) {
-	token, _, player := database.GetAuthorization(c)
+	token, _, player := database.GetAuthorization(c.Request)
 	if token == "" {
 		return
 	}
@@ -17,7 +17,7 @@ func GetSelf(c *gin.Context) {
 }
 
 func SetSelf(c *gin.Context) {
-	token, uuid, player := database.GetAuthorization(c)
+	token, uuid, player := database.GetAuthorization(c.Request)
 	if token == "" {
 		return
 	}

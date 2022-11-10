@@ -5,10 +5,12 @@ import (
 	"math/rand"
 	"os"
 	"strconv"
+	"time"
 )
 
 var lobbyCodeRunes = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 func LobbyCode() string {
+    rand.Seed(time.Now().UnixNano())
     codeLength, err := strconv.Atoi(os.Getenv("LOBBY_CODE_LENGTH"))
     if err != nil {
         codeLength = 4
@@ -25,6 +27,7 @@ func LobbyCode() string {
 }
 
 func GenerateToken() string {
+    rand.Seed(time.Now().UnixNano())
     b := make([]byte, 32)
     if _, err := rand.Read(b); err != nil {
         return ""

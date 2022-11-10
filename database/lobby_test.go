@@ -31,7 +31,7 @@ func TestAddLobby(t *testing.T) {
 
 	lobby := AddLobby(host)
 
-	if lobby.Host != host.ID {
+	if lobby.Host.ID != host.ID {
 		t.Errorf("Lobby host was not set correctly")
 	}
 
@@ -53,7 +53,7 @@ func TestGetLobby(t *testing.T) {
 
 	lobby := AddLobby(host)
 
-	if lobby.Host != host.ID {
+	if lobby.Host.ID != host.ID {
 		t.Errorf("Lobby host was not set correctly")
 	}
 

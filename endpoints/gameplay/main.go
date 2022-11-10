@@ -2,6 +2,7 @@ package gameplay
 
 import (
 	"edu/letu/wan/structs"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -22,13 +23,13 @@ func readMessage(conn *websocket.Conn) (string, []string) {
 	mt, message, err := conn.ReadMessage()
 	if err != nil {
 		log.Println("read:", err)
-		conn.WriteMessage(websocket.TextMessage, []byte("Error Reading Message"))
+		sendMessage(conn, "Error Reading Message")
 		return "", []string{}
 	}
 
 	if mt != websocket.TextMessage {
 		log.Println("weird websocket type:", mt)
-		conn.WriteMessage(websocket.TextMessage, []byte("Error Reading Message"))
+		sendMessage(conn, "Error Reading Message")
 		return "", []string{}
 	}
 
@@ -40,6 +41,13 @@ func readMessage(conn *websocket.Conn) (string, []string) {
 	log.Printf("recv command: %s\n     args: %s", command, strings.Join(args, " "))
 
 	return command, args;
+}
+
+func sendMessage(conn *websocket.Conn, message string) {
+	err := conn.WriteMessage(websocket.TextMessage, []byte(message))
+	if err != nil {
+		log.Println("write:", err)
+	}
 }
 
 func playerInLobby(conn *websocket.Conn, player *structs.Player, lobby *structs.Lobby) {
@@ -54,11 +62,8 @@ func playerInLobby(conn *websocket.Conn, player *structs.Player, lobby *structs.
 		command, args := readMessage(conn)
 
 		// write message
-		var err = conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("You sent command (%s) with args: %s", command, strings.Join(args, " "))))
-		if err != nil {
-			log.Println("write:", err)
-			break
-		}
+		var message = fmt.Sprintf("%s %s", command, strings.Join(args, " "))
+		sendMessage(conn, message)
 	}
 	
 }
@@ -86,6 +91,12 @@ func WSConnection(ginConn *gin.Context) {
 	if lobby == nil {
 		return
 	}
+
+	// send lobby data to player
+	lobbyWS := structs.LobbyWSFromLobby(*lobby)
+	lobbyJSON, err := json.Marshal(lobbyWS)
+	var message = fmt.Sprintf("joined %s", string(lobbyJSON))
+	sendMessage(conn, message)
 
 	playerInLobby(conn, player, lobby)
 }

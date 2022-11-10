@@ -79,7 +79,7 @@ func UpdateLobbyPassword(lobbyid string, password string) {
 func JoinLobby(lobbyid string, player structs.Player) {
 	if lobby, ok := Lobbies[lobbyid]; ok {
 		if len(lobby.Players) < 4 {
-			lobby.Players = append(lobby.Players, player.ID)
+			lobby.Players = append(lobby.Players, player)
 			Lobbies[lobbyid] = lobby
 		}
 	}
@@ -87,8 +87,8 @@ func JoinLobby(lobbyid string, player structs.Player) {
 
 func LeaveLobby(lobbyid string, player structs.Player) {
 	if lobby, ok := Lobbies[lobbyid]; ok {
-		for i, id := range lobby.Players {
-			if id == player.ID {
+		for i, p := range lobby.Players {
+			if p.ID == player.ID {
 				lobby.Players = append(lobby.Players[:i], lobby.Players[i+1:]...)
 				Lobbies[lobbyid] = lobby
 			}

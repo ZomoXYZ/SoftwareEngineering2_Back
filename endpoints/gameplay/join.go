@@ -13,7 +13,7 @@ func connectPlayer(conn *websocket.Conn) *structs.Player {
 
 	// first command must be authorization
 	if command != "authorization" || len(args) < 2 {
-		conn.WriteMessage(websocket.TextMessage, []byte("unauthorized"))
+		sendMessage(conn, "unauthorized")
 		conn.Close()
 		return nil
 	}
@@ -24,12 +24,12 @@ func connectPlayer(conn *websocket.Conn) *structs.Player {
 	// get player from database
 	player := database.GetAuthorizationPlayer(token, uuid)
 	if player == nil {
-		conn.WriteMessage(websocket.TextMessage, []byte("unauthorized"))
+		sendMessage(conn, "unauthorized")
 		conn.Close()
 		return nil
 	}
 
-	conn.WriteMessage(websocket.TextMessage, []byte("authorized"))
+	sendMessage(conn, "authorized")
 
 	return player
 }
@@ -39,7 +39,7 @@ func connectLobby(conn *websocket.Conn, player *structs.Player) *structs.Lobby {
 
 	// second command must be join lobby
 	if command != "join" || len(args) < 1 {
-		conn.WriteMessage(websocket.TextMessage, []byte("Invalid Command"))
+		sendMessage(conn, "badcommand")
 		conn.Close()
 		return nil
 	}
@@ -49,27 +49,25 @@ func connectLobby(conn *websocket.Conn, player *structs.Player) *structs.Lobby {
 	// get lobby from database
 	lobby := database.GetLobby(lobbyID)
 	if lobby == nil {
-		conn.WriteMessage(websocket.TextMessage, []byte("Invalid Lobby"))
+		sendMessage(conn, "badlobby")
 		conn.Close()
 		return nil
 	}
 
 	// make sure lobby can be joined
 	if len(lobby.Players) >= 4 {
-		conn.WriteMessage(websocket.TextMessage, []byte("Lobby Full"))
+		sendMessage(conn, "fulllobby")
 		conn.Close()
 		return nil
 	}
 
 	if lobby.Started {
-		conn.WriteMessage(websocket.TextMessage, []byte("Lobby Started"))
+		sendMessage(conn, "startlobby")
 		conn.Close()
 		return nil
 	}
 
 	database.JoinLobby(lobby.ID, *player)
-
-	conn.WriteMessage(websocket.TextMessage, []byte("Ok"))
 
 	return lobby
 }

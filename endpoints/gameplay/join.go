@@ -13,7 +13,7 @@ func connectPlayer(conn *websocket.Conn) *structs.Player {
 
 	// first command must be authorization
 	if command != "authorization" || len(args) < 2 {
-		conn.WriteMessage(websocket.TextMessage, []byte("Unauthorized"))
+		conn.WriteMessage(websocket.TextMessage, []byte("unauthorized"))
 		conn.Close()
 		return nil
 	}
@@ -24,12 +24,12 @@ func connectPlayer(conn *websocket.Conn) *structs.Player {
 	// get player from database
 	player := database.GetAuthorizationPlayer(token, uuid)
 	if player == nil {
-		conn.WriteMessage(websocket.TextMessage, []byte("Unauthorized"))
+		conn.WriteMessage(websocket.TextMessage, []byte("unauthorized"))
 		conn.Close()
 		return nil
 	}
 
-	conn.WriteMessage(websocket.TextMessage, []byte("Ok"))
+	conn.WriteMessage(websocket.TextMessage, []byte("authorized"))
 
 	return player
 }

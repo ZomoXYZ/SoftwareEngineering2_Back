@@ -1,10 +1,7 @@
 package gameplay
 
 import (
-	"edu/letu/wan/structs"
-	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 
@@ -19,18 +16,32 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func readMessage(conn *websocket.Conn) (string, []string) {
+type CommandMessage struct {
+	Command string
+	Args []string
+	Conn *websocket.Conn
+}
+
+func Command(conn *websocket.Conn, command string, args ...string) *CommandMessage{
+	return &CommandMessage{
+		Command: command,
+		Args: args,
+		Conn: conn,
+	}
+}
+
+func readMessage(conn *websocket.Conn) *CommandMessage {
 	mt, message, err := conn.ReadMessage()
 	if err != nil {
-		log.Println("read:", err)
-		sendMessage(conn, "error badmessage")
-		return "", []string{}
+		fmt.Println("read:", err)
+		sendMessage(Command(conn, "error badmessage"))
+		return nil
 	}
 
 	if mt != websocket.TextMessage {
-		log.Println("weird websocket type:", mt)
-		sendMessage(conn, "error badmessage")
-		return "", []string{}
+		fmt.Println("weird websocket type:", mt)
+		sendMessage(Command(conn, "error badmessage"))
+		return nil
 	}
 
 	// parse command
@@ -38,39 +49,50 @@ func readMessage(conn *websocket.Conn) (string, []string) {
 	var command = split[0]
 	var args = split[1:]
 
-	log.Printf("recv command: %s\n     args: %s", command, strings.Join(args, " "))
+	fmt.Printf("recv command: %s\n     args: %s", command, strings.Join(args, " "))
 
-	return command, args;
+	return &CommandMessage{
+		Command: command,
+		Args: args,
+		Conn: conn,
+	};
 }
 
-func sendMessage(conn *websocket.Conn, message string, args ...string) {
-	var fullMessage = message
-	if len(args) > 0 {
-		fullMessage += " " + strings.Join(args, " ")
+func sendMessage(command *CommandMessage) {
+	var fullMessage = command.Command
+	if len(command.Args) > 0 {
+		fullMessage += " " + strings.Join(command.Args, " ")
 	}
-	err := conn.WriteMessage(websocket.TextMessage, []byte(fullMessage))
+	err := command.Conn.WriteMessage(websocket.TextMessage, []byte(fullMessage))
 	if err != nil {
-		log.Println("write:", err)
+		fmt.Println("write:", err)
 	}
 }
 
-func playerInLobby(conn *websocket.Conn, player *structs.Player, lobby *structs.Lobby) {
-
-	// TODO move this to another file
-	// connect to game session
-	// use structs.ActiveGame
-	// each command will be a function and check against the state, return error if the state isn't correct
-	// this for loop should listen for all 4 players at once, it'll choose which to listen to with structs.ActiveGame.Players[i].Conn
-
-	for {
-		command, args := readMessage(conn)
-
-		// write message
-		var message = fmt.Sprintf("%s %s", command, strings.Join(args, " "))
-		sendMessage(conn, message)
+func sendCloseMessage(conn *websocket.Conn) {
+	err := conn.WriteMessage(websocket.CloseMessage, []byte{})
+	if err != nil {
+		fmt.Println("write:", err)
 	}
+}
+
+// func joinLiveLobby(conn *websocket.Conn, player *structs.Player, lobby *structs.Lobby) {
+// 	//player is in lobby, host is known to be connected
+// 	// if lobby already has a thread, look up the thread and send the player to it
+// 	// if lobby does not have a thread, create a new thread and send the player to it
+
+// 	// TODO move this to another file
+// 	// connect to game session
+// 	// use structs.ActiveGame
+// 	// each command will be a function and check against the state, return error if the state isn't correct
+// 	// this for loop should listen for all 4 players at once, it'll choose which to listen to with structs.ActiveGame.Players[i].Conn
+
+// 	for {
+// 		command := readMessage(conn)
+// 		sendMessage(command)
+// 	}
 	
-}
+// }
 
 func WSConnection(ginConn *gin.Context) {
 	var w = ginConn.Writer
@@ -79,32 +101,31 @@ func WSConnection(ginConn *gin.Context) {
 	// get as websocket command
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Print("upgrade:", err)
+		fmt.Print("upgrade:", err)
 		return
 	}
-	defer conn.Close()
 
 	//get player
 	player := connectPlayer(conn)
-	if player == nil {
+	if player == nil { // connection already closed if nil
 		return
 	}
 
 	// join/get lobby
 	lobby := connectLobby(conn, player)
-	if lobby == nil {
+	if lobby == nil { // connection already closed if nil
 		return
 	}
 
 	// send lobby data to player
-	lobbyWS := structs.LobbyWSFromLobby(*lobby)
-	lobbyJSON, err := json.Marshal(lobbyWS)
-	if err != nil {
-		log.Println("error converting lobby to json:", err)
-		return
-	}
-	var message = fmt.Sprintf("joined %s", string(lobbyJSON))
-	sendMessage(conn, message)
+	// lobbyWS := structs.LobbyWSFromLobby(*lobby)
+	// lobbyJSON, err := json.Marshal(lobbyWS)
+	// if err != nil {
+	// 	fmt.Println("error converting lobby to json:", err)
+	// 	return
+	// }
+	// // var message = fmt.Sprintf("joined %s", string(lobbyJSON))
+	// // sendMessage(Command(conn, message))
 
-	playerInLobby(conn, player, lobby)
+	joinLiveLobby(conn, player, lobby)
 }

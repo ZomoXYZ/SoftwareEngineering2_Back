@@ -26,6 +26,7 @@ type Lobby struct {
     Host Player
     Players []Player
     CreatedAt string
+    HostJoined bool
     Started bool
 }
 
@@ -48,11 +49,6 @@ func LobbyInfoFromLobby(lobby Lobby) LobbyInfo {
 }
 
 func LobbyWSFromLobby(lobby Lobby) LobbyWS {
-    var players = []Player{}
-    for i, _ := range lobby.Players {
-        players = append(players, lobby.Players[i])
-    }
-
     return LobbyWS{
         ID: lobby.ID,
         Code: lobby.Code,

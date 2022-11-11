@@ -1,6 +1,7 @@
 package gameplay
 
 import (
+	"edu/letu/wan/database"
 	"edu/letu/wan/structs"
 	"encoding/json"
 	"fmt"
@@ -59,6 +60,7 @@ type GamePlayer struct {
 	Game *ActiveGame
 
 	send chan CommandMessage
+	close chan bool
 }
 
 type TurnState struct {
@@ -79,6 +81,7 @@ type ActiveGame struct {
 	join chan *GamePlayer
 	leave chan *GamePlayer
 	command chan *PlayerCommandMessage
+	broadcast chan CommandMessage
 	close chan bool
 }
 
@@ -98,6 +101,7 @@ func GenerateActiveGame(lobby *structs.Lobby, host *structs.Player, hostConn *we
 		join: make(chan *GamePlayer),
 		leave: make(chan *GamePlayer),
 		command: make(chan *PlayerCommandMessage),
+		broadcast: make(chan CommandMessage),
 		close: make(chan bool),
 	}
  
@@ -166,6 +170,11 @@ func (p *GamePlayer) writePump() {
 			}
 			
 			sendMessage(ConnCommand(p.Conn, command.Command, command.Args...))
+		case close := <-p.close:
+			if close {
+				sendCloseMessage(p.Conn)
+				return
+			}
 		case <-ticker.C:
 			p.Conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := p.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
@@ -202,22 +211,28 @@ func (game ActiveGame) run() {
 	//start listening
 	for {
 		select {
-		// add player to game
+		// player joined
 		case player := <-game.join:
 			if game.InLobby && len(game.Players) < 3 {
+				// add player to game
 				game.Players = append(game.Players, player)
 
 				player.send <- Command("joined", JsonLobbyWSFromGame(game))
-				// TODO send message to all players that a new player has joined
+				game.broadcast <- Command("lobbyupdate", JsonLobbyWSFromGame(game))
 			} else {
-				// TODO reject player
+				// reject player
+				player.send <- Command("rejected")
+				player.close <- true
 			}
 
+		//player left
 		case player := <-game.leave:
-			fmt.Println("player leaving")
 			if player.Player.ID == game.Host.Player.ID {
-				// TODO end game
+				fmt.Println("host leaving")
+				// end game
+				game.close <- true
 			} else {
+				fmt.Println("player leaving")
 				// remove player from game
 				var index int
 				for i, p := range game.Players {
@@ -228,17 +243,36 @@ func (game ActiveGame) run() {
 				}
 				game.Players = append(game.Players[:index], game.Players[index+1:]...)
 
-				// TODO send message to all players that a player has left
+				game.broadcast <- Command("lobbyupdate", JsonLobbyWSFromGame(game))
 			}
 
+		// command rom player
 		case command := <-game.command:
 			// TODO handle command from player
-			fmt.Printf("Recv from: %s\n     command: %s\n     args: %s\n", command.Player.Player.ID, command.Cmd.Command, strings.Join(command.Cmd.Args, " "))
+			fmt.Printf("Recv from: %s\n     command: %s\n     args: %s\n",
+				command.Player.Player.ID, command.Cmd.Command, strings.Join(command.Cmd.Args, " "))
 
-		// case close := <-game.close:
-		// 	if close {
-		// 		// TODO close all connections, close game, remove from Games
-		// 	}
+		// send command to all players
+		case command := <-game.broadcast:
+			game.Host.send <- command
+			for _, player := range game.Players {
+				player.send <- command
+			}
+
+		// close game
+		case close := <-game.close:
+			if close {
+				fmt.Println("closing game")
+				game.Host.send <- Command("closed")
+				game.Host.close <- true
+				for _, player := range game.Players {
+					player.send <- Command("closed")
+					player.close <- true
+				}
+				// remove game and lobby from lists
+				database.RemoveLobby(*game.Host.Player)
+				delete(Games, game.LobbyID)
+			}
 		}
 	}
 }

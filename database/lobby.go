@@ -10,14 +10,18 @@ import (
 var Lobbies = make(map[string]structs.Lobby)
 
 func AddLobby(host structs.Player) structs.Lobby {
+	if lobby, ok := Lobbies[host.ID]; ok {
+		return lobby
+	}
 	lobby := structs.GenerateLobby(host)
-	// TODO check if user is already a host, give them that lobby if so
 	Lobbies[lobby.ID] = lobby
 	return lobby
 }
 
 func RemoveLobby(host structs.Player) {
-	delete(Lobbies, host.ID)
+	if lobby, ok := Lobbies[host.ID]; ok {
+		delete(Lobbies, lobby.ID)
+	}
 }
 
 func GetLobby(lobbyid string) *structs.Lobby {
@@ -26,6 +30,15 @@ func GetLobby(lobbyid string) *structs.Lobby {
 		return nil
 	}
 	return &lobby
+}
+
+func GetLobbyByHost(host structs.Player) *structs.Lobby {
+	for _, value := range Lobbies {
+		if value.Host.ID == host.ID {
+			return &value
+		}
+	}
+	return nil
 }
 
 func GetLobbyFromCode(code string) *structs.Lobby {

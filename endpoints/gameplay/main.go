@@ -98,24 +98,6 @@ func sendCloseMessage(conn *websocket.Conn) {
 	}
 }
 
-// func joinLiveLobby(conn *websocket.Conn, player *structs.Player, lobby *structs.Lobby) {
-// 	//player is in lobby, host is known to be connected
-// 	// if lobby already has a thread, look up the thread and send the player to it
-// 	// if lobby does not have a thread, create a new thread and send the player to it
-
-// 	// TODO move this to another file
-// 	// connect to game session
-// 	// use structs.ActiveGame
-// 	// each command will be a function and check against the state, return error if the state isn't correct
-// 	// this for loop should listen for all 4 players at once, it'll choose which to listen to with structs.ActiveGame.Players[i].Conn
-
-// 	for {
-// 		command := readMessage(conn)
-// 		sendMessage(command)
-// 	}
-	
-// }
-
 func WSConnection(ginConn *gin.Context) {
 	var w = ginConn.Writer
 	var r = ginConn.Request

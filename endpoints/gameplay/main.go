@@ -19,29 +19,55 @@ var upgrader = websocket.Upgrader{
 type CommandMessage struct {
 	Command string
 	Args []string
+}
+
+type ConnCommandMessage struct {
+	Cmd CommandMessage
 	Conn *websocket.Conn
 }
 
-func Command(conn *websocket.Conn, command string, args ...string) *CommandMessage{
-	return &CommandMessage{
+type PlayerCommandMessage struct {
+	Cmd CommandMessage
+	Player *GamePlayer
+}
+
+func Command(command string, args ...string) CommandMessage{
+	return CommandMessage{
 		Command: command,
 		Args: args,
+	}
+}
+
+func ConnCommand(conn *websocket.Conn, command string, args ...string) *ConnCommandMessage{
+	return &ConnCommandMessage{
+		Cmd: Command(command, args...),
 		Conn: conn,
 	}
 }
 
-func readMessage(conn *websocket.Conn) *CommandMessage {
+func PlayerCommand(player *GamePlayer, conn *websocket.Conn, command string, args ...string) *PlayerCommandMessage{
+	return &PlayerCommandMessage{
+		Cmd: Command(command, args...),
+		Player: player,
+	}
+}
+
+func readMessage(conn *websocket.Conn) (*ConnCommandMessage, bool) {
 	mt, message, err := conn.ReadMessage()
 	if err != nil {
+		if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+			conn.Close()
+			return nil, true
+		}
 		fmt.Println("read:", err)
-		sendMessage(Command(conn, "error badmessage"))
-		return nil
+		sendMessage(ConnCommand(conn, "error badmessage"))
+		return nil, false
 	}
 
 	if mt != websocket.TextMessage {
 		fmt.Println("weird websocket type:", mt)
-		sendMessage(Command(conn, "error badmessage"))
-		return nil
+		sendMessage(ConnCommand(conn, "error badmessage"))
+		return nil, false
 	}
 
 	// parse command
@@ -49,19 +75,15 @@ func readMessage(conn *websocket.Conn) *CommandMessage {
 	var command = split[0]
 	var args = split[1:]
 
-	fmt.Printf("recv command: %s\n     args: %s", command, strings.Join(args, " "))
+	fmt.Printf("recv command: %s\n     args: %s\n", command, strings.Join(args, " "))
 
-	return &CommandMessage{
-		Command: command,
-		Args: args,
-		Conn: conn,
-	};
+	return ConnCommand(conn, command, args...), false
 }
 
-func sendMessage(command *CommandMessage) {
-	var fullMessage = command.Command
-	if len(command.Args) > 0 {
-		fullMessage += " " + strings.Join(command.Args, " ")
+func sendMessage(command *ConnCommandMessage) {
+	var fullMessage = command.Cmd.Command
+	if len(command.Cmd.Args) > 0 {
+		fullMessage += " " + strings.Join(command.Cmd.Args, " ")
 	}
 	err := command.Conn.WriteMessage(websocket.TextMessage, []byte(fullMessage))
 	if err != nil {

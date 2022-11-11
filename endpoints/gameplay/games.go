@@ -4,6 +4,7 @@ import (
 	"edu/letu/wan/structs"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -14,13 +15,18 @@ const (
 	writeWait = 10 * time.Second
 
 	// Time allowed to read the next pong message from the peer.
-	pongWait = 60 * time.Second
+	pongWait = 30 * time.Second
 
 	// Send pings to peer with this period. Must be less than pongWait.
 	pingPeriod = (pongWait * 9) / 10
 
 	// Maximum message size allowed from peer.
 	maxMessageSize = 512
+)
+
+var (
+	newline = []byte{'\n'}
+	space   = []byte{' '}
 )
 
 type LobbyWS struct {
@@ -57,7 +63,7 @@ type GamePlayer struct {
 	Points int
 	Game *ActiveGame
 
-	// send chan *CommandMessage
+	send chan CommandMessage
 }
 
 type TurnState struct {
@@ -77,7 +83,7 @@ type ActiveGame struct {
 
 	join chan *GamePlayer
 	leave chan *GamePlayer
-	command chan *CommandMessage
+	command chan *PlayerCommandMessage
 	close chan bool
 }
 
@@ -96,7 +102,7 @@ func GenerateActiveGame(lobby *structs.Lobby, host *structs.Player, hostConn *we
 
 		join: make(chan *GamePlayer),
 		leave: make(chan *GamePlayer),
-		command: make(chan *CommandMessage),
+		command: make(chan *PlayerCommandMessage),
 		close: make(chan bool),
 	}
  
@@ -114,7 +120,7 @@ func GenerateGamePlayer(conn *websocket.Conn, player *structs.Player, game *Acti
 		Points: 0,
 		Game: game,
 
-		// send: make(chan *CommandMessage),
+		send: make(chan CommandMessage),
 	}
 
 	return &gamePlayer
@@ -143,37 +149,36 @@ func joinLiveLobby(conn *websocket.Conn, player *structs.Player, lobby *structs.
 		game.join <- gamePlayer
 	}
 
-	// go gamePlayer.writePump()
+	go gamePlayer.writePump()
 	go gamePlayer.readPump()
 
 }
 
-// func (p *GamePlayer) writePump() {
-// 	ticker := time.NewTicker(pingPeriod)
-// 	defer func() {
-// 		ticker.Stop()
-// 		p.Conn.Close()
-// 	}()
-// 	for {
-// 		select {
-// 		case message, ok := <-p.send:
-// 			fmt.Println("sending message to player")
-// 			p.Conn.SetWriteDeadline(time.Now().Add(writeWait))
-// 			if !ok {
-// 				// The hub closed the channel.
-// 				sendCloseMessage(p.Conn)
-// 				return
-// 			}
+func (p *GamePlayer) writePump() {
+	ticker := time.NewTicker(pingPeriod)
+	defer func() {
+		ticker.Stop()
+		p.Conn.Close()
+	}()
+	for {
+		select {
+		case command, ok := <-p.send:
+			p.Conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if !ok {
+				// The hub closed the channel.
+				sendCloseMessage(p.Conn)
+				return
+			}
 			
-// 			sendMessage(message)
-// 		case <-ticker.C:
-// 			p.Conn.SetWriteDeadline(time.Now().Add(writeWait))
-// 			if err := p.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
-// 				return
-// 			}
-// 		}
-// 	}
-// }
+			sendMessage(ConnCommand(p.Conn, command.Command, command.Args...))
+		case <-ticker.C:
+			p.Conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err := p.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				return
+			}
+		}
+	}
+}
 
 func (p *GamePlayer) readPump() {
 	defer func() {
@@ -184,22 +189,20 @@ func (p *GamePlayer) readPump() {
 	p.Conn.SetReadDeadline(time.Now().Add(pongWait))
 	p.Conn.SetPongHandler(func(string) error { p.Conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
-		// // TODO go back to how the example was doing it
-		// command := readMessage(p.Conn)
-		// p.Game.command <- command
-		mt, _, _ := p.Conn.ReadMessage()
-		fmt.Println("message type:", mt) //MT is -1?
+		command, disconnected := readMessage(p.Conn)
+		if disconnected {
+			break;
+		}
+		if command != nil {
+			p.Game.command <- PlayerCommand(p, command.Conn, command.Cmd.Command, command.Cmd.Args...)
+		}
 	}
-}
-
-func (p *GamePlayer) Send(message string, args ...string) {
-	sendMessage(Command(p.Conn, message, args...))
 }
 
 // connect channels
 func (game ActiveGame) run() {
 	//send data to host, who has just joined
-	game.Host.Send("joined", JsonLobbyWSFromGame(game))
+	game.Host.send <- Command("joined", JsonLobbyWSFromGame(game))
 
 	//start listening
 	for {
@@ -209,13 +212,14 @@ func (game ActiveGame) run() {
 			if game.InLobby && len(game.Players) < 3 {
 				game.Players = append(game.Players, player)
 
-				player.Send("joined", JsonLobbyWSFromGame(game))
+				player.send <- Command("joined", JsonLobbyWSFromGame(game))
 				// TODO send message to all players that a new player has joined
 			} else {
 				// TODO reject player
 			}
 
 		case player := <-game.leave:
+			fmt.Println("player leaving")
 			if player.Player.ID == game.Host.Player.ID {
 				// TODO end game
 			} else {
@@ -232,8 +236,9 @@ func (game ActiveGame) run() {
 				// TODO send message to all players that a player has left
 			}
 
-		// case command := <-game.command:
-		// 	// TODO handle command from player
+		case command := <-game.command:
+			// TODO handle command from player
+			fmt.Printf("Recv from: %s\n     command: %s\n     args: %s\n", command.Player.Player.ID, command.Cmd.Command, strings.Join(command.Cmd.Args, " "))
 
 		// case close := <-game.close:
 		// 	if close {

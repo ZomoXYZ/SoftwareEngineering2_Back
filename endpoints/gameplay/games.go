@@ -24,11 +24,6 @@ const (
 	maxMessageSize = 512
 )
 
-var (
-	newline = []byte{'\n'}
-	space   = []byte{' '}
-)
-
 type LobbyWS struct {
     ID string `json:"id" binding:"required"`
     Code string `json:"code" binding:"required"`

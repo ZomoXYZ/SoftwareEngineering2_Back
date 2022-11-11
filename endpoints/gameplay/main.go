@@ -23,13 +23,13 @@ func readMessage(conn *websocket.Conn) (string, []string) {
 	mt, message, err := conn.ReadMessage()
 	if err != nil {
 		log.Println("read:", err)
-		sendMessage(conn, "Error Reading Message")
+		sendMessage(conn, "error badmessage")
 		return "", []string{}
 	}
 
 	if mt != websocket.TextMessage {
 		log.Println("weird websocket type:", mt)
-		sendMessage(conn, "Error Reading Message")
+		sendMessage(conn, "error badmessage")
 		return "", []string{}
 	}
 
@@ -43,8 +43,12 @@ func readMessage(conn *websocket.Conn) (string, []string) {
 	return command, args;
 }
 
-func sendMessage(conn *websocket.Conn, message string) {
-	err := conn.WriteMessage(websocket.TextMessage, []byte(message))
+func sendMessage(conn *websocket.Conn, message string, args ...string) {
+	var fullMessage = message
+	if len(args) > 0 {
+		fullMessage += " " + strings.Join(args, " ")
+	}
+	err := conn.WriteMessage(websocket.TextMessage, []byte(fullMessage))
 	if err != nil {
 		log.Println("write:", err)
 	}
@@ -95,6 +99,10 @@ func WSConnection(ginConn *gin.Context) {
 	// send lobby data to player
 	lobbyWS := structs.LobbyWSFromLobby(*lobby)
 	lobbyJSON, err := json.Marshal(lobbyWS)
+	if err != nil {
+		log.Println("error converting lobby to json:", err)
+		return
+	}
 	var message = fmt.Sprintf("joined %s", string(lobbyJSON))
 	sendMessage(conn, message)
 

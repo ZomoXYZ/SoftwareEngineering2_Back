@@ -56,13 +56,13 @@ func connectLobby(conn *websocket.Conn, player *structs.Player) *structs.Lobby {
 
 	// make sure lobby can be joined
 	if len(lobby.Players) >= 4 {
-		sendMessage(conn, "fulllobby")
+		sendMessage(conn, "lobbyfull")
 		conn.Close()
 		return nil
 	}
 
 	if lobby.Started {
-		sendMessage(conn, "startlobby")
+		sendMessage(conn, "lobbyinprogress")
 		conn.Close()
 		return nil
 	}

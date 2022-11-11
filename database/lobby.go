@@ -43,8 +43,8 @@ func GetAvailableLobbies() []structs.Lobby {
 	lobbyArray := make([]structs.Lobby, 0, len(Lobbies))
 	for  _, value := range Lobbies {
 		
-		// if lobby is not started and is not full, add to array
-		if !value.Started && len(value.Players) < 4 {
+		// if lobby's host has joined, is not started, and is not full, then add to array
+		if value.HostJoined && !value.Started && len(value.Players) < 4 {
 			lobbyArray = append(lobbyArray, value)
 		}
 	}
@@ -76,13 +76,24 @@ func UpdateLobbyPassword(lobbyid string, password string) {
 	}
 }
 
-func JoinLobby(lobbyid string, player structs.Player) {
+func JoinLobby(lobbyid string, player structs.Player) *structs.Lobby {
 	if lobby, ok := Lobbies[lobbyid]; ok {
 		if len(lobby.Players) < 4 {
 			lobby.Players = append(lobby.Players, player)
 			Lobbies[lobbyid] = lobby
+			return &lobby
 		}
 	}
+	return nil
+}
+
+func HostJoinLobby(lobbyid string) *structs.Lobby {
+	if lobby, ok := Lobbies[lobbyid]; ok {
+		lobby.HostJoined = true
+		Lobbies[lobbyid] = lobby
+		return &lobby
+	}
+	return nil
 }
 
 func LeaveLobby(lobbyid string, player structs.Player) {

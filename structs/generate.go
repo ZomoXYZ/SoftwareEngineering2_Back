@@ -49,6 +49,7 @@ func GenerateLobby(host Player) Lobby {
 		Host: host,
 		Players: []Player{},
 		CreatedAt: time.Now().UTC().String(),
+		HostJoined: false,
 		Started: false,
 	}
 }

@@ -50,7 +50,6 @@ func JsonLobbyWSFromGame(game *ActiveGame) string {
 		return ""
 	}
 	return string(lobbyJSON)
-
 }
 
 type GamePlayer struct {
@@ -217,7 +216,7 @@ func (game *ActiveGame) run() {
 				game.Players = append(game.Players, player)
 
 				player.send <- Command("joined", JsonLobbyWSFromGame(game))
-				game.Broadcast(Command("lobbyupdate", JsonLobbyWSFromGame(game)), player)
+				game.Broadcast(Command("playerupdate", JsonLobbyWSFromGame(game)), player)
 			} else {
 				// reject player
 				player.send <- Command("rejected")
@@ -243,7 +242,7 @@ func (game *ActiveGame) run() {
 				}
 				game.Players = append(game.Players[:index], game.Players[index+1:]...)
 
-				game.Broadcast(Command("lobbyupdate", JsonLobbyWSFromGame(game)))
+				game.Broadcast(Command("playerupdate", JsonLobbyWSFromGame(game)))
 			}
 
 		// command rom player

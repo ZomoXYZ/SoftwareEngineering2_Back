@@ -217,7 +217,7 @@ func (game *ActiveGame) run() {
 				game.Players = append(game.Players, player)
 
 				player.send <- Command("joined", JsonLobbyWSFromGame(game))
-				game.Broadcast(Command("lobbyupdate", JsonLobbyWSFromGame(game)))
+				game.Broadcast(Command("lobbyupdate", JsonLobbyWSFromGame(game)), player)
 			} else {
 				// reject player
 				player.send <- Command("rejected")
@@ -227,13 +227,12 @@ func (game *ActiveGame) run() {
 		//player left
 		case player := <-game.leave:
 			if player.Player.ID == game.Host.Player.ID {
-				fmt.Println("host leaving")
+				// host leaving
 				// end game
-				// game.close <- true
 				game.Close(true)
 				return
 			} else {
-				fmt.Println("player leaving")
+				// player leaving
 				// remove player from game
 				var index int
 				for i, p := range game.Players {
@@ -252,31 +251,6 @@ func (game *ActiveGame) run() {
 			// TODO handle command from player
 			fmt.Printf("Recv from: %s\n     command: %s\n     args: %s\n",
 				command.Player.Player.ID, command.Cmd.Command, strings.Join(command.Cmd.Args, " "))
-
-		// send command to all players
-		// case command := <-game.broadcast:
-		// 	// TODO allow command to not send to one player (i.e. player joins, send update to everyone but joining player)
-		// 	game.Host.send <- command
-		//	for _, player := range game.Players {
-		// 		player.send <- command
-		// 	}
-
-		// close game
-		// case hostLeft := <-game.close:
-		// 	fmt.Println("closing game")
-		// 	// don't send to host if they've already left
-		// 	if !hostLeft {
-		// 		// game.Host.send <- Command("closed")
-		// 		game.Host.close <- true
-		// 	}
-		// 	for _, player := range game.Players {
-		// 		// player.send <- Command("closed")
-		// 		player.close <- true
-		// 	}
-		// 	// remove game and lobby from lists
-		// 	database.RemoveLobby(*game.Host.Player)
-		// 	delete(Games, game.LobbyID)
-		// 	return
 		}
 	}
 }
@@ -297,10 +271,24 @@ func (game *ActiveGame) Close(hostLeft bool) {
 	delete(Games, game.LobbyID)
 }
 
-func (game *ActiveGame) Broadcast(command CommandMessage) {
-	// TODO allow command to not send to one player (i.e. player joins, send update to everyone but joining player)
-	game.Host.send <- command
-	for _, player := range game.Players {
+func (game *ActiveGame) Broadcast(command CommandMessage, exclude ...*GamePlayer) {
+	players := game.GetPlayers(exclude...)
+	for _, player := range players {
 		player.send <- command
 	}
+}
+
+func (game *ActiveGame) GetPlayers(exclude ...*GamePlayer) []*GamePlayer {
+	var players []*GamePlayer
+	players = append(players, game.Host)
+	players = append(players, game.Players...)
+	for _, ex := range exclude {
+		for i, player := range players {
+			if player.Player.ID == ex.Player.ID {
+				players = append(players[:i], players[i+1:]...)
+				break
+			}
+		}
+	}
+	return players
 }

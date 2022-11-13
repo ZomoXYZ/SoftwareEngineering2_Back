@@ -2,19 +2,7 @@
 FROM golang:1.19-alpine
 
 WORKDIR /
-
-COPY .env .
-COPY go.mod .
-COPY main.go .
-
-COPY database .
-COPY endpoints .
-COPY gameplay .
-COPY structs .
-COPY util .
-
-# don't copy any database files
-RUN rm -f /*.db
+COPY . .
 
 # build-base is required for gcc
 # bash is just for debugging

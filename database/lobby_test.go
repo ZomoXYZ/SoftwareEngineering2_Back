@@ -17,7 +17,7 @@ LeaveLobby
 
 func TestAddLobby(t *testing.T) {
 	// clear lobbies
-	Lobbies = make(map[string]structs.Lobby)
+	Lobbies = make(map[string]*structs.Lobby)
 
 	// create a player
 	host := structs.Player{
@@ -39,7 +39,7 @@ func TestAddLobby(t *testing.T) {
 
 func TestGetLobby(t *testing.T) {
 	// clear lobbies
-	Lobbies = make(map[string]structs.Lobby)
+	Lobbies = make(map[string]*structs.Lobby)
 
 	// create a player
 	host := structs.Player{

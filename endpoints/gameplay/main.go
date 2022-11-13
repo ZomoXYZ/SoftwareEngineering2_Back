@@ -55,13 +55,17 @@ func PlayerCommand(player *GamePlayer, conn *websocket.Conn, command string, arg
 func readMessage(conn *websocket.Conn) (*ConnCommandMessage, bool) {
 	mt, message, err := conn.ReadMessage()
 	if err != nil {
-		if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+		if websocket.IsUnexpectedCloseError(err) {
 			conn.Close()
 			return nil, true
 		}
-		fmt.Println("read:", err)
 		sendMessage(ConnCommand(conn, "error badmessage"))
 		return nil, false
+	}
+
+	if mt == websocket.CloseMessage {
+		conn.Close()
+		return nil, true
 	}
 
 	if mt != websocket.TextMessage {
@@ -87,14 +91,14 @@ func sendMessage(command *ConnCommandMessage) {
 	}
 	err := command.Conn.WriteMessage(websocket.TextMessage, []byte(fullMessage))
 	if err != nil {
-		fmt.Println("write:", err)
+		fmt.Printf("MSG WRITE ERROR: %s, attempting to send %s\n", err, command.Cmd.Command)
 	}
 }
 
 func sendCloseMessage(conn *websocket.Conn) {
 	err := conn.WriteMessage(websocket.CloseMessage, []byte{})
 	if err != nil {
-		fmt.Println("write:", err)
+		fmt.Println("CLOSE MSG WRITE ERROR:", err)
 	}
 }
 
@@ -105,7 +109,7 @@ func WSConnection(ginConn *gin.Context) {
 	// get as websocket command
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		fmt.Print("upgrade:", err)
+		fmt.Println("upgrade:", err)
 		return
 	}
 

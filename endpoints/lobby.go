@@ -58,7 +58,7 @@ func GetLobbyListAfter(c *gin.Context) {
 
 	// if no lobbies were created after the timestamp, return empty list
 	if startIndex == -1 {
-		c.JSON(200, structs.LobbyListFromLobbies([]structs.Lobby{}))
+		c.JSON(200, structs.LobbyListFromLobbies([]*structs.Lobby{}))
 		return
 	}
 
@@ -83,7 +83,7 @@ func CreateLobby(c *gin.Context) {
 
 	lobby := database.AddLobby(*player)
 
-	c.JSON(200, structs.LobbyInfoFromLobby(lobby))
+	c.JSON(200, structs.LobbyInfoFromLobby(*lobby))
 }
 
 func GetLobbyFromCode(c *gin.Context) {
@@ -119,7 +119,7 @@ func TempCreateLobbies(c *gin.Context) {
 }
 
 func TempDeleteLobbies(c *gin.Context) {
-	database.Lobbies = make(map[string]structs.Lobby)
+	database.Lobbies = make(map[string]*structs.Lobby)
 
 	c.JSON(200, gin.H{
 		"message": "success",

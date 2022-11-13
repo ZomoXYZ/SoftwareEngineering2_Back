@@ -16,17 +16,17 @@ type Lobby struct {
     ID string
     Code string
     Password string
-    Host Player
-    Players []Player
+    Host *Player
+    Players []*Player
     CreatedAt string
     HostJoined bool
     Started bool
 }
 
-func LobbyListFromLobbies(lobbies []Lobby) LobbyList {
+func LobbyListFromLobbies(lobbies []*Lobby) LobbyList {
     var lobbyList = LobbyList{ Lobbies: make([]LobbyInfo, 0) }
     for _, lobby := range lobbies {
-        lobbyList.Lobbies = append(lobbyList.Lobbies, LobbyInfoFromLobby(lobby))
+        lobbyList.Lobbies = append(lobbyList.Lobbies, LobbyInfoFromLobby(*lobby))
     }
     return lobbyList
 }

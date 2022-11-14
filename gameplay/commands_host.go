@@ -5,18 +5,7 @@ import (
 	"strconv"
 )
 
-/*
-commands anywheree
-  kick
-commands in lobby
-  setpassword
-  setpointgoal
-commands in game
-  ...
-*/
-
 func RunHostCommand(game *ActiveGame, cmd *PlayerCommandMessage) bool {
-	//TODO
 	switch (cmd.Cmd.Command) {
 	case "kick":
 		commandKick(game, cmd)
@@ -34,6 +23,13 @@ func RunHostCommand(game *ActiveGame, cmd *PlayerCommandMessage) bool {
 			return false
 		}
 		commandSetPointGoal(game, cmd)
+		return true
+
+	case "start":
+		if !game.InLobby {
+			return false
+		}
+		// TODO start game
 		return true
 	}
 	return false

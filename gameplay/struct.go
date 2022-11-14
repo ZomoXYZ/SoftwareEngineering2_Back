@@ -46,6 +46,10 @@ type TurnState struct {
 	DidDiscard bool
 }
 
+type GameSettings struct {
+	PointsToWin int
+}
+
 type ActiveGame struct {
 	LobbyID string
 	LobbyCode string
@@ -53,6 +57,8 @@ type ActiveGame struct {
 	Players []*GamePlayer
 	TurnState TurnState
 	InLobby bool
+
+	Settings GameSettings
 
 	Join chan *GamePlayer
 	Leave chan *GamePlayer

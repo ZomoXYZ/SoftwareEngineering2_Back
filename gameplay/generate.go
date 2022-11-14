@@ -40,9 +40,9 @@ func GenerateActiveGame(lobby *structs.Lobby, host *structs.Player, hostConn *we
 		},
 		InLobby: true,
 
-		join: make(chan *GamePlayer),
-		leave: make(chan *GamePlayer),
-		command: make(chan *PlayerCommandMessage),
+		Join: make(chan *GamePlayer),
+		Leave: make(chan *GamePlayer),
+		Command: make(chan *PlayerCommandMessage),
 	}
  
 	var hostGamePlayer = GenerateGamePlayer(hostConn, host, &game)
@@ -59,7 +59,7 @@ func GenerateGamePlayer(conn *websocket.Conn, player *structs.Player, game *Acti
 		Points: 0,
 		Game: game,
 
-		send: make(chan CommandMessage),
+		Send: make(chan CommandMessage),
 	}
 
 	return &gamePlayer

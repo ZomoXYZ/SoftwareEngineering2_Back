@@ -35,8 +35,8 @@ type GamePlayer struct {
 	Cards []*structs.Card
 	Game *ActiveGame
 
-	send chan CommandMessage
-	close chan bool
+	Send chan CommandMessage
+	Close chan bool
 }
 
 type TurnState struct {
@@ -54,7 +54,7 @@ type ActiveGame struct {
 	TurnState TurnState
 	InLobby bool
 
-	join chan *GamePlayer
-	leave chan *GamePlayer
-	command chan *PlayerCommandMessage
+	Join chan *GamePlayer
+	Leave chan *GamePlayer
+	Command chan *PlayerCommandMessage
 }

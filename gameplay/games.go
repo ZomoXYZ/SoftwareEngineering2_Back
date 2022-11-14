@@ -36,7 +36,7 @@ func joinLiveLobby(conn *websocket.Conn, player *structs.Player, lobby *structs.
 	} else {
 		//add player to game
 		gamePlayer = GenerateGamePlayer(conn, player, game)
-		game.join <- gamePlayer
+		game.Join <- gamePlayer
 	}
 
 	go gamePlayer.readPump()
@@ -52,7 +52,7 @@ func (p *GamePlayer) writePump() {
 	}()
 	for {
 		select {
-		case command, ok := <-p.send:
+		case command, ok := <-p.Send:
 			p.Conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				// The hub closed the channel.
@@ -61,7 +61,7 @@ func (p *GamePlayer) writePump() {
 			}
 			
 			sendMessage(ConnCommand(p.Conn, command.Command, command.Args...))
-		case <-p.close:
+		case <-p.Close:
 			sendCloseMessage(p.Conn)
 			return
 		case <-ticker.C:
@@ -77,7 +77,7 @@ func (p *GamePlayer) writePump() {
 func (p *GamePlayer) readPump() {
 	defer func() {
 		p.Conn.Close()
-		p.Game.leave <- p
+		p.Game.Leave <- p
 	}()
 	p.Conn.SetReadLimit(maxMessageSize)
 	p.Conn.SetReadDeadline(time.Now().Add(pongWait))
@@ -88,7 +88,7 @@ func (p *GamePlayer) readPump() {
 			return
 		}
 		if command != nil {
-			p.Game.command <- PlayerCommand(p, command.Conn, command.Cmd.Command, command.Cmd.Args...)
+			p.Game.Command <- PlayerCommand(p, command.Conn, command.Cmd.Command, command.Cmd.Args...)
 		}
 	}
 }
@@ -96,27 +96,27 @@ func (p *GamePlayer) readPump() {
 // game session goroutine
 func (game *ActiveGame) run() {
 	//send data to host, who has just joined
-	game.Host.send <- Command("joined", JsonLobbyWSFromGame(game))
+	game.Host.Send <- Command("joined", JsonLobbyWSFromGame(game))
 
 	//start listening
 	for {
 		select {
 		// player joined
-		case player := <-game.join:
+		case player := <-game.Join:
 			if game.InLobby && len(game.Players) < 3 {
 				// add player to game
 				game.Players = append(game.Players, player)
 
-				player.send <- Command("joined", JsonLobbyWSFromGame(game))
+				player.Send <- Command("joined", JsonLobbyWSFromGame(game))
 				game.Broadcast(Command("playerupdate", JsonLobbyWSFromGame(game)), player)
 			} else {
 				// reject player
-				player.send <- Command("rejected")
-				player.close <- true
+				player.Send <- Command("rejected")
+				player.Close <- true
 			}
 
 		//player left
-		case player := <-game.leave:
+		case player := <-game.Leave:
 			if player.Player.ID == game.Host.Player.ID {
 				// host leaving
 				// end game
@@ -138,23 +138,23 @@ func (game *ActiveGame) run() {
 			}
 
 		// command rom player
-		case command := <-game.command:
+		case command := <-game.Command:
 			// TODO handle command from player
 			fmt.Printf("Recv from: %s\n     command: %s\n     args: %s\n",
 				command.Player.Player.ID, command.Cmd.Command, strings.Join(command.Cmd.Args, " "))
 
 			if command.Player.Player.ID == game.Host.Player.ID {
-				ran := hostCommand(game, command)
+				ran := RunHostCommand(game, command)
 				if ran {
 					continue
 				}
 			}
 
-			ran := playerCommand(game, command)
+			ran := RunPlayerCommand(game, command)
 			if ran {
 				continue
 			}
-			command.Player.send <- Command("error", "unknown command")
+			command.Player.Send <- Command("error", "unknown command")
 		}
 	}
 }
@@ -163,12 +163,12 @@ func (game *ActiveGame) Close(hostLeft bool) {
 	fmt.Println("closing game")
 	// don't send to host if they've already left
 	if !hostLeft {
-		// game.Host.send <- Command("closed")
-		game.Host.close <- true
+		// game.Host.Send <- Command("closed")
+		game.Host.Close <- true
 	}
 	for _, player := range game.Players {
-		// player.send <- Command("closed")
-		player.close <- true
+		// player.Send <- Command("closed")
+		player.Close <- true
 	}
 	// remove game and lobby from lists
 	database.RemoveLobby(*game.Host.Player)
@@ -178,7 +178,7 @@ func (game *ActiveGame) Close(hostLeft bool) {
 func (game *ActiveGame) Broadcast(command CommandMessage, exclude ...*GamePlayer) {
 	players := game.GetPlayers(exclude...)
 	for _, player := range players {
-		player.send <- command
+		player.Send <- command
 	}
 }
 

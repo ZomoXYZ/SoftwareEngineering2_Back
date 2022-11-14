@@ -33,7 +33,7 @@ func GeneratePlayer() Player {
 	}
 }
 
-func GenerateLobby(host Player) Lobby {
+func GenerateLobby(host *Player) *Lobby {
 	node, err := snowflake.NewNode(nodeIndex)
 	nodeIndex++;
 	if err != nil {
@@ -42,13 +42,14 @@ func GenerateLobby(host Player) Lobby {
 
 	var lobbyid = node.Generate()
 
-	return Lobby{
+	return &Lobby{
 		ID: lobbyid.String(),
 		Code: util.LobbyCode(),
 		Password: "",
 		Host: host,
-		Players: []Player{},
+		Players: []*Player{},
 		CreatedAt: time.Now().UTC().String(),
+		HostJoined: false,
 		Started: false,
 	}
 }

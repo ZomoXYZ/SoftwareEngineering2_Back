@@ -4,9 +4,6 @@ FROM golang:1.19-alpine
 WORKDIR /
 COPY . .
 
-# don't copy any database files
-RUN rm -f /*.db
-
 # build-base is required for gcc
 # bash is just for debugging
 RUN apk add build-base bash

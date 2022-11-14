@@ -1,7 +1,7 @@
 package endpoints
 
 import (
-	"edu/letu/wan/endpoints/gameplay"
+	"edu/letu/wan/gameplay"
 
 	"github.com/gin-gonic/gin"
 )

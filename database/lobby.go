@@ -7,17 +7,27 @@ import (
 	"time"
 )
 
-var Lobbies = make(map[string]structs.Lobby)
+var Lobbies = make(map[string]*structs.Lobby)
 
-func AddLobby(host structs.Player) structs.Lobby {
-	lobby := structs.GenerateLobby(host)
-	// TODO check if user is already a host, give them that lobby if so
+func AddLobby(host structs.Player) *structs.Lobby {
+	lobby := GetLobbyByHost(host)
+	if lobby != nil {
+		return lobby
+	}
+	lobby = structs.GenerateLobby(&host)
 	Lobbies[lobby.ID] = lobby
 	return lobby
 }
 
 func RemoveLobby(host structs.Player) {
-	delete(Lobbies, host.ID)
+	fmt.Println("starting to remove lobby for host", host.ID)
+	lobby := GetLobbyByHost(host)
+	if lobby != nil {
+		fmt.Println("removing lobby", lobby.Code)
+		delete(Lobbies, lobby.ID)
+	} else {
+		fmt.Println("removing lobby NONE TO REMOVE")
+	}
 }
 
 func GetLobby(lobbyid string) *structs.Lobby {
@@ -25,26 +35,35 @@ func GetLobby(lobbyid string) *structs.Lobby {
 	if !ok {
 		return nil
 	}
-	return &lobby
+	return lobby
+}
+
+func GetLobbyByHost(host structs.Player) *structs.Lobby {
+	for _, value := range Lobbies {
+		if value.Host.ID == host.ID {
+			return value
+		}
+	}
+	return nil
 }
 
 func GetLobbyFromCode(code string) *structs.Lobby {
 	for _, value := range Lobbies {
 		fmt.Println(code, value.Code)
 		if value.Code == code {
-			return &value
+			return value
 		}
 	}
 	return nil
 }
 
-func GetAvailableLobbies() []structs.Lobby {
+func GetAvailableLobbies() []*structs.Lobby {
 	//array of all lobbies
-	lobbyArray := make([]structs.Lobby, 0, len(Lobbies))
+	lobbyArray := make([]*structs.Lobby, 0, len(Lobbies))
 	for  _, value := range Lobbies {
 		
-		// if lobby is not started and is not full, add to array
-		if !value.Started && len(value.Players) < 4 {
+		// if lobby's host has joined, is not started, and is not full, then add to array
+		if value.HostJoined && !value.Started && len(value.Players) < 4 {
 			lobbyArray = append(lobbyArray, value)
 		}
 	}
@@ -76,13 +95,24 @@ func UpdateLobbyPassword(lobbyid string, password string) {
 	}
 }
 
-func JoinLobby(lobbyid string, player structs.Player) {
+func JoinLobby(lobbyid string, player structs.Player) *structs.Lobby {
 	if lobby, ok := Lobbies[lobbyid]; ok {
 		if len(lobby.Players) < 4 {
-			lobby.Players = append(lobby.Players, player)
+			lobby.Players = append(lobby.Players, &player)
 			Lobbies[lobbyid] = lobby
+			return lobby
 		}
 	}
+	return nil
+}
+
+func HostJoinLobby(lobbyid string) *structs.Lobby {
+	if lobby, ok := Lobbies[lobbyid]; ok {
+		lobby.HostJoined = true
+		Lobbies[lobbyid] = lobby
+		return lobby
+	}
+	return nil
 }
 
 func LeaveLobby(lobbyid string, player structs.Player) {

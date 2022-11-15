@@ -29,7 +29,8 @@ func RunHostCommand(game *ActiveGame, cmd *PlayerCommandMessage) bool {
 		if !game.InLobby {
 			return false
 		}
-		// TODO start game
+		game.InLobby = false
+		game.Broadcast(Command("starting"))
 		return true
 	}
 	return false

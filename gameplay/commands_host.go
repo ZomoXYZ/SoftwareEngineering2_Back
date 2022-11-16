@@ -2,6 +2,8 @@ package gameplay
 
 import (
 	"edu/letu/wan/database"
+	"edu/letu/wan/structs"
+	"encoding/json"
 	"strconv"
 )
 
@@ -29,8 +31,7 @@ func RunHostCommand(game *ActiveGame, cmd *PlayerCommandMessage) bool {
 		if !game.InLobby {
 			return false
 		}
-		game.InLobby = false
-		game.Broadcast(Command("starting"))
+		commandStart(game, cmd)
 		return true
 	}
 	return false
@@ -67,4 +68,40 @@ func commandSetPointGoal(game *ActiveGame, cmd *PlayerCommandMessage) {
 	}
 
 	game.Settings.PointsToWin = pointGoal
+}
+
+type GameStartJson struct {
+	Cards []structs.Card `json:"cards" binding:"required"`
+	DiscardPile structs.Card `json:"discardPile" binding:"required"`
+}
+
+func commandStart(game *ActiveGame, cmd *PlayerCommandMessage) {
+	game.InLobby = false
+
+	// set game state
+	game.GameState = GameState{
+		CurrentPlayer: 0,
+		DiscardPile: structs.RandomCard(),
+	}
+	game.TurnState = TurnState{
+		DidDraw: false,
+		DidDiscard: false,
+		DidPlay: false,
+	}
+
+	// fill each player's hands
+	for _, player := range game.GetPlayers() {
+		player.Cards = make([]structs.Card, 0)
+		for i := 0; i < 5; i++ {
+			player.Cards = append(player.Cards, structs.RandomCard())
+		}
+		cardsJson, err := json.Marshal(GameStartJson{
+			Cards: player.Cards,
+			DiscardPile: game.GameState.DiscardPile,
+		})
+		if err != nil {
+			return
+		}
+		player.Send <- Command("starting", string(cardsJson))
+	}
 }

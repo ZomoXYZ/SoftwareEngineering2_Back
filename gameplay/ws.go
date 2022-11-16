@@ -10,6 +10,7 @@ import (
 func readMessage(conn *websocket.Conn) (*ConnCommandMessage, bool) {
 	mt, message, err := conn.ReadMessage()
 	if err != nil {
+		fmt.Println("MSG READ ERROR:", err)
 		if websocket.IsUnexpectedCloseError(err) {
 			conn.Close()
 			return nil, true

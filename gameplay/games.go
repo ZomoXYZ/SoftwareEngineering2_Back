@@ -85,7 +85,7 @@ func (p *GamePlayer) readPump() {
 	for {
 		command, disconnected := readMessage(p.Conn)
 		if disconnected {
-			return
+			break
 		}
 		if command != nil {
 			p.Game.Command <- PlayerCommand(p, command.Conn, command.Cmd.Command, command.Cmd.Args...)

@@ -32,7 +32,7 @@ type GamePlayer struct {
 	Player *structs.Player
 	Conn *websocket.Conn
 	Points int
-	Cards []*structs.Card
+	Cards []structs.Card
 	Game *ActiveGame
 
 	Send chan CommandMessage
@@ -40,10 +40,13 @@ type GamePlayer struct {
 }
 
 type TurnState struct {
-	CurrentPlayer int
 	DidDraw bool
-	DidPlay bool
 	DidDiscard bool
+	DidPlay bool
+}
+type GameState struct {
+	CurrentPlayer int
+	DiscardPile structs.Card //only need to store top card
 }
 
 type GameSettings struct {
@@ -56,6 +59,7 @@ type ActiveGame struct {
 	Host *GamePlayer
 	Players []*GamePlayer
 	TurnState TurnState
+	GameState GameState
 	InLobby bool
 
 	Settings GameSettings

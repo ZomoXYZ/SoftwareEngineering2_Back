@@ -33,10 +33,13 @@ func GenerateActiveGame(lobby *structs.Lobby, host *structs.Player, hostConn *we
 		LobbyCode: lobby.Code,
 		Players: []*GamePlayer{},
 		TurnState: TurnState{
-			CurrentPlayer: 0,
 			DidDraw: false,
 			DidPlay: false,
 			DidDiscard: false,
+		},
+		GameState: GameState{
+			CurrentPlayer: 0,
+			DiscardPile: structs.RandomCard(),
 		},
 		InLobby: true,
 

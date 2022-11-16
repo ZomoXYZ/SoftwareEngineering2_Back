@@ -21,8 +21,10 @@ func connectPlayer(conn *websocket.Conn) *structs.Player {
 		return nil
 	}
 
-	var token = command.Cmd.Args[0]
-	var uuid = command.Cmd.Args[1]
+	var (
+		token = command.Cmd.Args[0]
+		uuid = command.Cmd.Args[1]
+	)
 
 	// get player from database
 	player := database.GetAuthorizationPlayer(token, uuid)

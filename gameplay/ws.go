@@ -2,30 +2,37 @@ package gameplay
 
 import (
 	"fmt"
+	"io"
+	"io/ioutil"
 	"strings"
 
 	"github.com/gorilla/websocket"
 )
 
 func readMessage(conn *websocket.Conn) (*ConnCommandMessage, bool) {
-	mt, message, err := conn.ReadMessage()
+
+	//get reader
+	var r io.Reader
+	messageType, r, err := conn.NextReader()
 	if err != nil {
-		fmt.Println("MSG READ ERROR:", err)
-		if websocket.IsUnexpectedCloseError(err) {
-			conn.Close()
-			return nil, true
-		}
+		// error in connection, player is offline
+		return nil, true
+	}
+
+	//read message
+	message, err := ioutil.ReadAll(r)
+	if err != nil {
 		sendMessage(ConnCommand(conn, "error badmessage"))
 		return nil, false
 	}
 
-	if mt == websocket.CloseMessage {
+	if messageType == websocket.CloseMessage {
 		conn.Close()
 		return nil, true
 	}
 
-	if mt != websocket.TextMessage {
-		fmt.Println("weird websocket type:", mt)
+	if messageType != websocket.TextMessage {
+		fmt.Println("weird websocket type:", messageType)
 		sendMessage(ConnCommand(conn, "error badmessage"))
 		return nil, false
 	}

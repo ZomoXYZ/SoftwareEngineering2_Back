@@ -38,7 +38,7 @@ func RandomCard() Card {
 	if num < 12 {
 		return Card(num)
 	} else {
-		num := rand.Intn(3)
+		num := rand.Intn(4)
 		if num < 2 {
 			return Free
 		} else if num == 2 {

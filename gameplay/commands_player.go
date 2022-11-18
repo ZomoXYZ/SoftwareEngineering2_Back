@@ -206,13 +206,14 @@ func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
 		}
 		player.Cards = playerCards
 
-		// TODO count points
+		// TODO count points and confirm cards are valid
 
 		// re-marshal playData and broadcast
 		playDataJSON, err := json.Marshal(playData)
 		if err != nil {
 			return
 		}
+		game.TurnState.DidDraw = true
 		game.Broadcast(Command("played", string(playDataJSON)))
 
 		// check if player won

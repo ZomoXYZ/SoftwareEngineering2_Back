@@ -41,7 +41,7 @@ func readMessage(conn *websocket.Conn) (*ConnCommandMessage, bool) {
 	var command = split[0]
 	var args = split[1:]
 
-	fmt.Printf("recv command: %s\n     args: %s\n", command, strings.Join(args, " "))
+	// fmt.Printf("recv command: %s\n     args: %s\n", command, strings.Join(args, " "))
 
 	return ConnCommand(conn, command, args...), false
 }

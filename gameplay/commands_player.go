@@ -25,7 +25,7 @@ func RunPlayerCommand(game *ActiveGame, cmd *PlayerCommandMessage) bool {
 		return false
 	}
 
-	if game.GameState.CurrentPlayer != playerIndex {
+	if game.GameState.EveryoneIn && game.GameState.CurrentPlayer != playerIndex {
 		return false
 	}
 	player := players[playerIndex]
@@ -38,21 +38,16 @@ func RunPlayerCommand(game *ActiveGame, cmd *PlayerCommandMessage) bool {
 		if !game.TurnState.DidDraw {
 			commandDraw(game, player, cmd.Cmd.Args)
 		}
-		// draw card
 		return true
 	case "discard":
 		if game.TurnState.DidDraw && !game.TurnState.DidDiscard {
 			commandDiscard(game, player, cmd.Cmd.Args)
 		}
-		// discard card
 		return true
 	case "play":
 		if game.TurnState.DidDraw && game.TurnState.DidDiscard && !game.TurnState.DidPlay {
 			commandPlay(game, player, cmd.Cmd.Args)
 		}
-		// play cards
-		// update state
-		// next player's turn
 		return true
 	}
 	return false

@@ -3,6 +3,7 @@ package gameplay
 import (
 	"edu/letu/wan/structs"
 	"encoding/json"
+	"fmt"
 	"strconv"
 )
 
@@ -45,7 +46,9 @@ func RunPlayerCommand(game *ActiveGame, cmd *PlayerCommandMessage) bool {
 		}
 		return true
 	case "play":
+		fmt.Println("trying to play, drew", game.TurnState.DidDraw, ", discarded", game.TurnState.DidDiscard, ", played", game.TurnState.DidPlay)
 		if game.TurnState.DidDraw && game.TurnState.DidDiscard && !game.TurnState.DidPlay {
+			fmt.Println("about to play")
 			commandPlay(game, player, cmd.Cmd.Args)
 		}
 		return true
@@ -165,6 +168,7 @@ func commandDiscard(game *ActiveGame, player *GamePlayer, args []string) {
 	}
 
 	game.GameState.DiscardPile = discardCard
+	game.TurnState.DidDiscard = true
 	game.Broadcast(Command("discarded", strconv.Itoa(int(discardCard))))
 }
 
@@ -175,6 +179,7 @@ type CardsBodyJSON struct {
 
 // > play {"cards": []cardType}
 func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
+	fmt.Println("playing")
 	if len(args) == 0 {
 		// no args, player is passing
 		game.Broadcast(Command("passed"))
@@ -213,7 +218,7 @@ func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
 		if err != nil {
 			return
 		}
-		game.TurnState.DidDraw = true
+		game.TurnState.DidPlay = true
 		game.Broadcast(Command("played", string(playDataJSON)))
 
 		// check if player won

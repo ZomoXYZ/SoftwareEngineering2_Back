@@ -44,6 +44,10 @@ func GenerateActiveGame(lobby *structs.Lobby, host *structs.Player, hostConn *we
 		},
 		InLobby: true,
 
+		Settings: GameSettings{
+			PointsToWin: 17,
+		},
+
 		Join: make(chan *GamePlayer),
 		Leave: make(chan *GamePlayer),
 		Command: make(chan *PlayerCommandMessage),

@@ -3,7 +3,6 @@ package gameplay
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"strings"
 
 	"github.com/gorilla/websocket"
@@ -20,7 +19,7 @@ func readMessage(conn *websocket.Conn) (*ConnCommandMessage, bool) {
 	}
 
 	//read message
-	message, err := ioutil.ReadAll(r)
+	message, err := io.ReadAll(r)
 	if err != nil {
 		sendMessage(ConnCommand(conn, "error badmessage"))
 		return nil, false

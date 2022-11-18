@@ -24,7 +24,7 @@ type PlayerCommandMessage struct {
 type LobbyWS struct {
     ID string `json:"id" binding:"required"`
     Code string `json:"code" binding:"required"`
-    Host *structs.Player `json:"host" binding:"required"`
+    Host string `json:"host" binding:"required"`
     Players []*structs.Player `json:"players" binding:"required"`
 }
 
@@ -34,6 +34,7 @@ type GamePlayer struct {
 	Points int
 	Cards []structs.Card
 	Game *ActiveGame
+	InGame bool
 
 	Send chan CommandMessage
 	Close chan bool
@@ -45,6 +46,7 @@ type TurnState struct {
 	DidPlay bool
 }
 type GameState struct {
+	EveryoneIn bool
 	CurrentPlayer int
 	DiscardPile structs.Card //only need to store top card
 }

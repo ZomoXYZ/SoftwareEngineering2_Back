@@ -12,8 +12,10 @@ func RunPlayerCommand(game *ActiveGame, cmd *PlayerCommandMessage) bool {
 		return false
 	}
 
+	players := game.GetPlayers()
+
 	playerIndex := -1
-	for i, player := range game.Players {
+	for i, player := range players {
 		if player.Player.ID == cmd.Player.Player.ID {
 			playerIndex = i
 			break
@@ -26,9 +28,12 @@ func RunPlayerCommand(game *ActiveGame, cmd *PlayerCommandMessage) bool {
 	if game.GameState.CurrentPlayer != playerIndex {
 		return false
 	}
-	player := game.Players[playerIndex]
+	player := players[playerIndex]
 
 	switch (cmd.Cmd.Command) {
+	case "ingame":
+		commandIngame(game, player)
+		return true
 	case "draw":
 		if !game.TurnState.DidDraw {
 			commandDraw(game, player, cmd.Cmd.Args)
@@ -56,6 +61,54 @@ func RunPlayerCommand(game *ActiveGame, cmd *PlayerCommandMessage) bool {
 type PlayerDrewCard struct {
 	From int `json:"from" binding:"required"`
 	Card structs.Card `json:"card" binding:"required"`
+}
+
+// {
+// 	"cards": my hand,
+// 	"discardPile": discard pile,
+// 	"points": each player points,
+// 	"turn": whose turn it is,
+// }
+
+type SendTurnState struct {
+	Cards []structs.Card `json:"cards" binding:"required"`
+	DiscardPile structs.Card `json:"discardPile" binding:"required"`
+	Points []int `json:"points" binding:"required"`
+	Turn string `json:"turn" binding:"required"`
+}
+
+func broadcastTurnState(game *ActiveGame) {
+	players := game.GetPlayers()
+	allPlayerPoints := make([]int, len(players))
+	for i, player := range players {
+		allPlayerPoints[i] = player.Points
+	}
+
+	turnPlayerID := players[game.GameState.CurrentPlayer].Player.ID
+
+	for _, player := range players {
+		turnStateJSON, err := json.Marshal(SendTurnState{
+			Cards: player.Cards,
+			DiscardPile: game.GameState.DiscardPile,
+			Points: allPlayerPoints,
+			Turn: turnPlayerID,
+		})
+		if err != nil {
+			return
+		}
+		player.Send <- Command("turn", string(turnStateJSON))
+	}
+}
+
+func commandIngame(game *ActiveGame, player *GamePlayer) {
+	player.InGame = true
+	for _, player := range game.GetPlayers() {
+		if !player.InGame {
+			return
+		}
+	}
+	game.GameState.EveryoneIn = true
+	broadcastTurnState(game)
 }
 
 // > draw 0/1
@@ -158,6 +211,8 @@ func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
 		}
 		player.Cards = playerCards
 
+		// TODO count points
+
 		// re-marshal playData and broadcast
 		playDataJSON, err := json.Marshal(playData)
 		if err != nil {
@@ -188,11 +243,11 @@ func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
 	}
 
 	// update game state
-	game.GameState.CurrentPlayer = (game.GameState.CurrentPlayer + 1) % len(game.Players)
+	game.GameState.CurrentPlayer = (game.GameState.CurrentPlayer + 1) % len(game.GetPlayers())
 	game.TurnState = TurnState{
 		DidDraw: false,
 		DidDiscard: false,
 		DidPlay: false,
 	}
-	game.Broadcast(Command("nextturn", game.Players[game.GameState.CurrentPlayer].Player.ID))
+	broadcastTurnState(game)
 }

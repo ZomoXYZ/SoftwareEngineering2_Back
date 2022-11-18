@@ -9,14 +9,15 @@ import (
 )
 
 func JsonLobbyWSFromGame(game *ActiveGame) string {
-	var players = make([]*structs.Player, 0)
-	for _, player := range game.Players {
-		players = append(players, player.Player)
+	gamePlayers := game.GetPlayers()
+	players := []*structs.Player{}
+	for _, gamePlayer := range gamePlayers {
+		players = append(players, gamePlayer.Player)
 	}
     var lobbyWS = LobbyWS{
         ID: game.LobbyID,
         Code: game.LobbyCode,
-        Host: game.Host.Player,
+        Host: game.Host.Player.ID,
         Players: players,
     }
 	lobbyJSON, err := json.Marshal(lobbyWS)

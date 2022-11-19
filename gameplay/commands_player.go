@@ -58,7 +58,7 @@ func RunPlayerCommand(game *ActiveGame, cmd *PlayerCommandMessage) bool {
 
 type PlayerDrewCard struct {
 	From int `json:"from" binding:"required"`
-	Card structs.Card `json:"card" binding:"required"`
+	Card structs.Card `json:"card"`
 }
 
 // {
@@ -139,8 +139,16 @@ func commandDraw(game *ActiveGame, player *GamePlayer, args []string) {
 	if err != nil {
 		return
 	}
+
+	broadDrewJSON, err := json.Marshal(PlayerDrewCard{
+		From: drawType,
+	})
+	if err != nil {
+		return
+	}
 	game.TurnState.DidDraw = true
-	game.Broadcast(Command("drew", string(drewJSON)))
+	player.Send <- Command("drew", string(drewJSON))
+	game.Broadcast(Command("drew", string(broadDrewJSON)), player)
 }
 
 // > discard cardType

@@ -196,7 +196,7 @@ func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
 		var playData CardsBodyJSON
 		err := json.Unmarshal([]byte(args[0]), &playData)
 		if err != nil {
-			player.Send <- Command("badcommand")
+			player.Send <- Command("badcommand", "invalid json")
 			return
 		}
 
@@ -213,7 +213,7 @@ func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
 			}
 
 			if !found {
-				player.Send <- Command("badcommand")
+				player.Send <- Command("badcommand", fmt.Sprintf("card %d not found", card))
 				return
 			}
 		}

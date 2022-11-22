@@ -34,11 +34,6 @@ func Initialize(app *gin.Engine) {
 	app.POST("/lobby", CreateLobby)
 	app.GET("/lobby/:code", GetLobbyFromCode)
 
-	// TODO remove these
-	//temp
-	app.GET("/createlobbies", TempCreateLobbies)
-	app.GET("/deletelobbies", TempDeleteLobbies)
-
 	//player
 	app.GET("/player/:playerid", GetPlayer)
 

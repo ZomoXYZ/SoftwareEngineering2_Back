@@ -105,23 +105,3 @@ func GetLobbyFromCode(c *gin.Context) {
 
 	c.JSON(200, structs.LobbyInfoFromLobby(*lobby))
 }
-
-func TempCreateLobbies(c *gin.Context) {
-	player := structs.GeneratePlayer()
-
-	for i := 0; i < 100; i++ {
-		database.AddLobby(player)
-	}
-
-	c.JSON(200, gin.H{
-		"message": "success",
-	})
-}
-
-func TempDeleteLobbies(c *gin.Context) {
-	database.Lobbies = make(map[string]*structs.Lobby)
-
-	c.JSON(200, gin.H{
-		"message": "success",
-	})
-}

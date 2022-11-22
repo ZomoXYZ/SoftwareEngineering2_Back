@@ -68,6 +68,7 @@ func GenerateGamePlayer(conn *websocket.Conn, player *structs.Player, game *Acti
 		Game: game,
 
 		Send: make(chan CommandMessage),
+		Close: make(chan bool),
 	}
 
 	return &gamePlayer

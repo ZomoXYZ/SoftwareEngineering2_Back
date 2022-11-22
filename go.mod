@@ -4,7 +4,11 @@ go 1.19
 
 require github.com/gin-gonic/gin v1.8.1
 
-require github.com/gorilla/websocket v1.5.0 // indirect
+require (
+	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
+	github.com/gorilla/websocket v1.5.0 // indirect
+	go.uber.org/ratelimit v0.2.0 // indirect
+)
 
 require (
 	github.com/bwmarrin/snowflake v0.3.0

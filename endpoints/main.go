@@ -2,46 +2,59 @@ package endpoints
 
 import (
 	"edu/letu/wan/gameplay"
+	"flag"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/ratelimit"
 )
 
-func Initialize(r *gin.Engine) {
+var (
+	limit ratelimit.Limiter
+	rps   = flag.Int("rps", 25, "request per second")
+)
+
+func Initialize(app *gin.Engine) {
+	limit = ratelimit.New(*rps)
+	
+	app.Use(func(ctx *gin.Context) {
+		limit.Take()
+	})
+
 	//generic/dev
-	r.GET("/ping", Ping)
-	r.GET("/pingauth", PingAuthorized)
+	app.GET("/ping", Ping)
+	app.GET("/pingauth", PingAuthorized)
 
 	//authorization
-	r.GET("/authorization", Authorization)
-	r.POST("/authorization", CheckAuthorization)
+	app.GET("/authorization", Authorization)
+	app.POST("/authorization", CheckAuthorization)
 
 	//lobby
-	r.GET("/lobbylist", GetLobbyListLatest)
-	r.GET("/lobbylist/:timestamp", GetLobbyListAfter)
-	r.POST("/lobby", CreateLobby)
-	r.GET("/lobby/:code", GetLobbyFromCode)
+	app.GET("/lobbylist", GetLobbyListLatest)
+	app.GET("/lobbylist/:timestamp", GetLobbyListAfter)
+	app.POST("/lobby", CreateLobby)
+	app.GET("/lobby/:code", GetLobbyFromCode)
 
 	// TODO remove these
 	//temp
-	r.GET("/createlobbies", TempCreateLobbies)
-	r.GET("/deletelobbies", TempDeleteLobbies)
+	app.GET("/createlobbies", TempCreateLobbies)
+	app.GET("/deletelobbies", TempDeleteLobbies)
 
 	//player
-	r.GET("/player/:playerid", GetPlayer)
+	app.GET("/player/:playerid", GetPlayer)
 
 	//self
-	r.GET("/self", GetSelf)
-	r.POST("/self", SetSelf)
+	app.GET("/self", GetSelf)
+	app.POST("/self", SetSelf)
 
 	//meta
-	r.GET("/meta/names", MetaNames)
-	r.GET("/meta/pictures", MetaPictures)
+	app.GET("/meta/names", MetaNames)
+	app.GET("/meta/pictures", MetaPictures)
 
 	//websocket
-	r.GET("/ws", gameplay.WSConnection)
+	app.GET("/ws", gameplay.WSConnection)
 
 	//teapot
-	r.GET("/teapot", func (c *gin.Context) {
+	app.GET("/teapot", func (c *gin.Context) {
 		c.AbortWithStatus(418)
 	})
 }

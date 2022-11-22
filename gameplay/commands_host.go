@@ -79,16 +79,7 @@ func commandStart(game *ActiveGame, cmd *PlayerCommandMessage) {
 	game.InLobby = false
 
 	// set game state
-	game.GameState = GameState{
-		CurrentPlayer: 0,
-		DiscardPile: structs.RandomCard(),
-	}
-	game.TurnState = TurnState{
-		DidDraw: false,
-		DidDiscard: false,
-		DidPlay: false,
-	}
-	database.GetLobby(game.LobbyID).Started = true
+	game.ResetState(false)
 
 	// fill each player's hands
 	for _, player := range game.GetPlayers() {

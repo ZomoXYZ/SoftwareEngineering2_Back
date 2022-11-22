@@ -197,3 +197,25 @@ func (game *ActiveGame) GetPlayers(exclude ...*GamePlayer) []*GamePlayer {
 	}
 	return players
 }
+
+func (game *ActiveGame) ResetState(inLobby bool) {
+	// game state
+	game.InLobby = inLobby
+	game.GameState = GameState{
+		CurrentPlayer: 0,
+		DiscardPile: structs.RandomCard(),
+	}
+	game.TurnState = TurnState{
+		DidDraw: false,
+		DidDiscard: false,
+		DidPlay: false,
+	}
+	// player state
+	for _, player := range game.GetPlayers() {
+		player.Points = 0
+		player.Cards = make([]structs.Card, 0)
+		player.InGame = false
+	}
+	// lobby state
+	database.GetLobby(game.LobbyID).Started = !inLobby
+}

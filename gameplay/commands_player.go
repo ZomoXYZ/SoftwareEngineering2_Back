@@ -220,6 +220,8 @@ func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
 		player.Cards = playerCards
 
 		// TODO count points and confirm cards are valid
+		// TODO this is stupid dont leave this in
+		player.Points += len(playData.Cards)
 
 		// re-marshal playData and broadcast
 		playDataJSON, err := json.Marshal(playData)
@@ -231,7 +233,7 @@ func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
 
 		// check if player won
 		if player.Points >= game.Settings.PointsToWin {
-			game.InLobby = true
+			game.ResetState(true)
 			game.Broadcast(Command("gameover", player.Player.ID))
 			return
 		}

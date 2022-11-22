@@ -72,13 +72,13 @@ func GetAvailableLobbies() []*structs.Lobby {
 	sort.Slice(lobbyArray, func(i, j int) bool {
 		iCreatedAt, err := time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", lobbyArray[i].CreatedAt)
 		if err != nil {
-			// TODO do something else ? this shouldn't ever trigger
-			panic(err)
+			// return as if i is older
+			return false
 		}
 		jCreatedAt, err := time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", lobbyArray[j].CreatedAt)
 		if err != nil {
-			// TODO do something else ? this shouldn't ever trigger
-			panic(err)
+			// return as if j is older
+			return true
 		}
 		return iCreatedAt.After(jCreatedAt)
 	})

@@ -88,6 +88,7 @@ func commandStart(game *ActiveGame, cmd *PlayerCommandMessage) {
 		DidDiscard: false,
 		DidPlay: false,
 	}
+	database.GetLobby(game.LobbyID).Started = true
 
 	// fill each player's hands
 	for _, player := range game.GetPlayers() {

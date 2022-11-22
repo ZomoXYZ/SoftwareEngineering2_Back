@@ -231,6 +231,7 @@ func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
 
 		// check if player won
 		if player.Points >= game.Settings.PointsToWin {
+			game.InLobby = true
 			game.Broadcast(Command("gameover", player.Player.ID))
 			return
 		}

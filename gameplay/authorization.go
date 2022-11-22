@@ -40,7 +40,6 @@ func connectPlayer(conn *websocket.Conn) *structs.Player {
 }
 
 func connectLobby(conn *websocket.Conn, player *structs.Player) *structs.Lobby {
-	//TODO what if lobby has password
 	
 	command, disconnected := readMessage(conn)
 	if disconnected {
@@ -62,6 +61,16 @@ func connectLobby(conn *websocket.Conn, player *structs.Player) *structs.Lobby {
 		sendMessage(ConnCommand(conn, "badlobby"))
 		conn.Close()
 		return nil
+	}
+
+	// check password
+	if lobby.Password != "" {
+		// second arg will be password
+		if len(command.Cmd.Args) < 2 || command.Cmd.Args[1] != lobby.Password {
+			sendMessage(ConnCommand(conn, "badpassword"))
+			conn.Close()
+			return nil
+		}
 	}
 
 	// make sure lobby can be joined

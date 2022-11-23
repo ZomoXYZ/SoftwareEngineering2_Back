@@ -12,7 +12,7 @@ func main() {
 	godotenv.Load()
 
 	// initialize endpoints
-	router := gin.Default() // TODO don't use Default (also add support for .env port)
+	router := gin.Default()
 	endpoints.Initialize(router)
 	router.Run()
 }

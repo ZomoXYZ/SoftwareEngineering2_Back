@@ -140,7 +140,6 @@ func (game *ActiveGame) run() {
 
 		// command rom player
 		case command := <-game.Command:
-			// TODO handle command from player
 			fmt.Printf("Recv from: %s\n     command: %s\n     args: %s\n",
 				command.Player.Player.ID, command.Cmd.Command, strings.Join(command.Cmd.Args, " "))
 

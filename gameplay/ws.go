@@ -9,7 +9,6 @@ import (
 )
 
 func readMessage(conn *websocket.Conn) (*ConnCommandMessage, bool) {
-
 	//get reader
 	var r io.Reader
 	messageType, r, err := conn.NextReader()

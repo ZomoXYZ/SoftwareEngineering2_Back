@@ -85,7 +85,6 @@ func (p *GamePlayer) readPump() {
 	for {
 		command, disconnected := readMessage(p.Conn)
 		if disconnected {
-			fmt.Println("PLAYER DISCONNECTED, BREAKING")
 			break
 		}
 		if command != nil {

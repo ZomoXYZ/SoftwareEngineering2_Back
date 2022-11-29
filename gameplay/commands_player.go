@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"time"
 )
 
 func RunPlayerCommand(game *ActiveGame, cmd *PlayerCommandMessage) bool {
@@ -219,8 +220,12 @@ func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
 		}
 		player.Cards = playerCards
 
-		// TODO count points and confirm cards are valid
-		// TODO this is stupid dont leave this in
+		// hand := calculateHand(playData.Cards)
+		// if hand == NoHand {
+		// 	player.Send <- Command("badcommand", "invalid hand")
+		// 	return
+		// }
+		// player.Points += hand.Points()
 		player.Points += len(playData.Cards)
 
 		// re-marshal playData and broadcast
@@ -233,6 +238,7 @@ func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
 
 		// check if player won
 		if player.Points >= game.Settings.PointsToWin {
+			time.Sleep(100 * time.Millisecond)
 			game.ResetState(true)
 			game.Broadcast(Command("gameover", player.Player.ID))
 			return

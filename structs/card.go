@@ -29,6 +29,14 @@ const (
 	TriangleFree
 )
 
+func (c Card) IsFree() bool {
+	if c == Free || c == CircleFree || c == TriangleFree {
+		return true
+	} else {
+		return false
+	}
+}
+
 func RandomCard() Card {
 	// every individual card has an equal chance of being selected, except all forms of free card are counted as one
     rand.Seed(time.Now().UnixNano())

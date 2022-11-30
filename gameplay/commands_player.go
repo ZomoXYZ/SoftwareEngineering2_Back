@@ -188,7 +188,7 @@ type CardsBodyJSON struct {
 
 type PlayedCardsJson struct {
 	Cards []structs.Card `json:"cards" binding:"required"`
-	HandType Hand `json:"handType" binding:"required"`
+	HandType Hand `json:"type" binding:"required"`
 	WanMoPair []structs.Card `json:"wanmo"`
 }
 

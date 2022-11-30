@@ -237,12 +237,12 @@ func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
 			Cards: playData.Cards,
 			HandType: hand,
 		}
-		playDataJSON, err := json.Marshal(playedData)
+		playedDataJSON, err := json.Marshal(playedData)
 		if err != nil {
 			return
 		}
 		game.TurnState.DidPlay = true
-		game.Broadcast(Command("played", string(playDataJSON)))
+		game.Broadcast(Command("played", string(playedDataJSON)))
 
 		// check if player won
 		if player.Points >= game.Settings.PointsToWin {

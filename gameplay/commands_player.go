@@ -208,6 +208,12 @@ func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
 			return
 		}
 
+		// no cards, player is passing
+		if len(playData.Cards) == 0 {
+			game.Broadcast(Command("passed"))
+			return
+		}
+
 		// validate hand and ger points
 		hand := calculateHand(playData.Cards, playData.WanMoPair)
 		if hand == NoHand {

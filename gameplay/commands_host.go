@@ -69,14 +69,18 @@ func commandSetPointGoal(game *ActiveGame, cmd *PlayerCommandMessage) {
 
 	game.Settings.PointsToWin = pointGoal
 }
-
 type GameStartJson struct {
 	Cards []structs.Card `json:"cards" binding:"required"`
 	DiscardPile structs.Card `json:"discardPile" binding:"required"`
 }
 
 func commandStart(game *ActiveGame, cmd *PlayerCommandMessage) {
-	game.InLobby = false
+
+	// TODO // dont start if there are not enough players
+	// if len(game.Players) == 0 {
+	// 	cmd.Player.Send <- Command("error", "start", "no players in lobby")
+	// 	return
+	// }
 
 	// set game state
 	game.ResetState(false)

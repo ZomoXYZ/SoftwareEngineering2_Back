@@ -185,6 +185,11 @@ type CardsBodyJSON struct {
 	Cards []structs.Card `json:"cards" binding:"required"`
 }
 
+type PlayedCardsJson struct {
+	Cards []structs.Card `json:"cards" binding:"required"`
+	HandType Hand `json:"handType" binding:"required"`
+}
+
 
 // > play {"cards": []cardType}
 func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
@@ -228,7 +233,11 @@ func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
 		player.Points += hand.Points()
 
 		// re-marshal playData and broadcast
-		playDataJSON, err := json.Marshal(playData)
+		playedData := PlayedCardsJson{
+			Cards: playData.Cards,
+			HandType: hand,
+		}
+		playDataJSON, err := json.Marshal(playedData)
 		if err != nil {
 			return
 		}

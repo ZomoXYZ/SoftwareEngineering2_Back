@@ -36,7 +36,7 @@ func (h Hand) Points() int {
 	return 0
 }
 
-func calculateHand(hand []structs.Card) Hand {
+func calculateHand(hand []structs.Card, wanMoPair []structs.Card) Hand {
 	if len(hand) == 1 && hand[0].IsFree() {
 		return SingleFree
 	}
@@ -58,8 +58,10 @@ func calculateHand(hand []structs.Card) Hand {
 			return DoubleShapePair
 		}
 		if structs.CardsFollow(hand, structs.CircleTriangle2, structs.CircleInverted2) || structs.CardsFollow(hand, structs.TriangleCircle2, structs.TriangleInverted2) {
+			if len(wanMoPair) == 2 && wanMoPair[0].MatchAll(wanMoPair[1]) {
+				return WanMo
+			}
 			return BigPair
-			//TODO check for additional pair from client
 		}
 	}
 	if len(hand) == 3 {

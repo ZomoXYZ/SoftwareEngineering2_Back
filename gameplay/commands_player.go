@@ -183,11 +183,13 @@ func commandDiscard(game *ActiveGame, player *GamePlayer, args []string) {
 
 type CardsBodyJSON struct {
 	Cards []structs.Card `json:"cards" binding:"required"`
+	WanMoPair []structs.Card `json:"wanmo"`
 }
 
 type PlayedCardsJson struct {
 	Cards []structs.Card `json:"cards" binding:"required"`
 	HandType Hand `json:"handType" binding:"required"`
+	WanMoPair []structs.Card `json:"wanmo"`
 }
 
 
@@ -206,13 +208,28 @@ func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
 			return
 		}
 
-		// update player's cards
+		// validate hand and ger points
+		hand := calculateHand(playData.Cards, playData.WanMoPair)
+		if hand == NoHand {
+			player.Send <- Command("badcommand", "invalid hand")
+			return
+		}
+
+		// make sure player has the cards they are playing and remove them
 		playerCards := player.Cards
-		for _, card := range playData.Cards {
+		cardsPlayed := playData.Cards
+		if hand == WanMo {
+			cardsPlayed = append(cardsPlayed, playData.WanMoPair...)
+		}
+		for _, card := range cardsPlayed {
 			var found = false
 			for i, playerCard := range playerCards {
 				if playerCard == card {
-					playerCards = append(playerCards[:i], playerCards[i+1:]...)
+					if i < len(playerCards) - 1 {
+						playerCards = append(playerCards[:i], playerCards[i+1:]...)
+					} else {
+						playerCards = playerCards[:i]
+					}
 					found = true
 					break
 				}
@@ -223,14 +240,10 @@ func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
 				return
 			}
 		}
-		player.Cards = playerCards
 
-		hand := calculateHand(playData.Cards)
-		if hand == NoHand {
-			player.Send <- Command("badcommand", "invalid hand")
-			return
-		}
+		// update player
 		player.Points += hand.Points()
+		player.Cards = playerCards
 
 		// re-marshal playData and broadcast
 		playedData := PlayedCardsJson{

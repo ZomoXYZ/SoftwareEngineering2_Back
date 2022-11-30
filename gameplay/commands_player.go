@@ -220,13 +220,12 @@ func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
 		}
 		player.Cards = playerCards
 
-		// hand := calculateHand(playData.Cards)
-		// if hand == NoHand {
-		// 	player.Send <- Command("badcommand", "invalid hand")
-		// 	return
-		// }
-		// player.Points += hand.Points()
-		player.Points += len(playData.Cards)
+		hand := calculateHand(playData.Cards)
+		if hand == NoHand {
+			player.Send <- Command("badcommand", "invalid hand")
+			return
+		}
+		player.Points += hand.Points()
 
 		// re-marshal playData and broadcast
 		playDataJSON, err := json.Marshal(playData)

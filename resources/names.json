@@ -1,0 +1,28 @@
+{
+    "adjectives": {
+        "0": "The Wan",
+        "1": "Wicked",
+        "2": "Better",
+        "3": "The Best",
+        "4": "Beautiful",
+        "5": "Happy",
+        "6": "Amazing",
+        "7": "Adept",
+        "8": "Hardworking",
+        "9": "Red",
+        "10": "Green"
+    },
+    "nouns": {
+        "0": "And Only",
+        "1": "Duck",
+        "2": "Cat",
+        "3": "Tangent",
+        "4": "Sine",
+        "5": "Cosine",
+        "6": "Coffee Shop",
+        "7": "Grizzly Bear",
+        "8": "Fruit",
+        "9": "Triangle",
+        "10": "Circle"
+    }
+}

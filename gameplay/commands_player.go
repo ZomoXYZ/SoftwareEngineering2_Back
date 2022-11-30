@@ -246,9 +246,14 @@ func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
 		player.Cards = playerCards
 
 		// re-marshal playData and broadcast
+		wanMoPair := playData.WanMoPair
+		if hand != WanMo {
+			wanMoPair = make([]structs.Card, 0)
+		}
 		playedData := PlayedCardsJson{
 			Cards: playData.Cards,
 			HandType: hand,
+			WanMoPair: wanMoPair,
 		}
 		playedDataJSON, err := json.Marshal(playedData)
 		if err != nil {

@@ -107,20 +107,58 @@ func (c Card) MatchAll(d Card) bool {
 	return c.MatchShape(d) && c.MatchCount(d) && c.MatchInvert(d)
 }
 
+func (card Card) isMoreSpecific(other Card) bool {
+	// card isn't free
+	if !card.IsFree() {
+		return true
+	}
+	// other isn't free
+	if !other.IsFree() {
+		return false
+	}
+	// card isn't any free
+	if card.Shape() != FreeShape {
+		return true
+	}
+	// other isn't any free
+	if other.Shape() != FreeShape {
+		return false
+	}
+	// both are any free
+	return true
+}
+
+func removeCard(hand []Card, card Card) (bool, []Card) {
+	var bestCard Card = -1
+	var bestIndex = -1
+	for i, c := range hand {
+		if card.MatchAll(c) {
+			if bestCard == -1 || c.isMoreSpecific(bestCard) {
+				bestCard = c
+				bestIndex = i
+			}
+		}
+	}
+	if bestIndex != -1 {
+		return true, append(hand[:bestIndex], hand[bestIndex+1:]...)
+	}
+	return false, []Card{}
+}
+
 func CardsFollow(hand []Card, pattern ...Card) bool {
 	if len(hand) != len(pattern) {
 		return false
 	}
-	for _, card := range pattern {
-		for j, c := range hand {
-			if card == c {
-				hand = append(hand[:j], hand[j+1:]...)
-				pattern = append(pattern[:j], pattern[j+1:]...)
-				break
-			}
+	handCopy := make([]Card, len(hand))
+	copy(handCopy, hand)
+	for _, cardPattern := range pattern {
+		removed, newHand := removeCard(handCopy, cardPattern)
+		if !removed {
+			return false
 		}
+		handCopy = newHand
 	}
-	return len(pattern) == 0
+	return true
 }
 
 func RandomCard() Card {

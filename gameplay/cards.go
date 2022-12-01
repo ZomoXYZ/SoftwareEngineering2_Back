@@ -50,10 +50,6 @@ func calculateHand(hand []structs.Card, wanMoPair []structs.Card) Hand {
 		if hand[0] == hand[1] {
 			return Pair
 		}
-		// cards match shape and count but are inverted
-		if hand[0].MatchShapeCount(hand[1]) {
-			return PairInverted
-		}
 		// special pairs
 		if structs.CardsFollow(hand, structs.Circle2, structs.Triangle2) {
 			if len(wanMoPair) == 2 && wanMoPair[0].MatchAll(wanMoPair[1]) {
@@ -66,6 +62,10 @@ func calculateHand(hand []structs.Card, wanMoPair []structs.Card) Hand {
 				return WanMo_BigPair
 			}
 			return BigPair
+		}
+		// cards match shape and count but are inverted
+		if hand[0].MatchShapeCount(hand[1]) {
+			return PairInverted
 		}
 	}
 	if len(hand) == 3 {

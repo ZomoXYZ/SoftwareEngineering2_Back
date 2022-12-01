@@ -211,85 +211,85 @@ func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
 		// no cards, player is passing
 		if len(playData.Cards) == 0 {
 			game.Broadcast(Command("passed"))
-			return
-		}
+		} else {
 
-		// validate hand and ger points
-		hand := calculateHand(playData.Cards, playData.WanMoPair)
-		if hand == NoHand {
-			player.Send <- Command("badcommand", "invalid hand")
-			return
-		}
+			// validate hand and ger points
+			hand := calculateHand(playData.Cards, playData.WanMoPair)
+			if hand == NoHand {
+				player.Send <- Command("badcommand", "invalid hand")
+				return
+			}
 
-		// make sure player has the cards they are playing and remove them
-		playerCards := player.Cards
-		cardsPlayed := playData.Cards
-		if hand == WanMo {
-			cardsPlayed = append(cardsPlayed, playData.WanMoPair...)
-		}
-		for _, card := range cardsPlayed {
-			var found = false
-			for i, playerCard := range playerCards {
-				if playerCard == card {
-					if i < len(playerCards) - 1 {
-						playerCards = append(playerCards[:i], playerCards[i+1:]...)
-					} else {
-						playerCards = playerCards[:i]
+			// make sure player has the cards they are playing and remove them
+			playerCards := player.Cards
+			cardsPlayed := playData.Cards
+			if hand == WanMo {
+				cardsPlayed = append(cardsPlayed, playData.WanMoPair...)
+			}
+			for _, card := range cardsPlayed {
+				var found = false
+				for i, playerCard := range playerCards {
+					if playerCard == card {
+						if i < len(playerCards) - 1 {
+							playerCards = append(playerCards[:i], playerCards[i+1:]...)
+						} else {
+							playerCards = playerCards[:i]
+						}
+						found = true
+						break
 					}
-					found = true
-					break
+				}
+
+				if !found {
+					player.Send <- Command("badcommand", fmt.Sprintf("card %d not found", card))
+					return
 				}
 			}
 
-			if !found {
-				player.Send <- Command("badcommand", fmt.Sprintf("card %d not found", card))
+			// update player
+			player.Points += hand.Points()
+			player.Cards = playerCards
+
+			// re-marshal playData and broadcast
+			wanMoPair := playData.WanMoPair
+			if hand != WanMo {
+				wanMoPair = make([]structs.Card, 0)
+			}
+			playedData := PlayedCardsJson{
+				Cards: playData.Cards,
+				HandType: hand,
+				WanMoPair: wanMoPair,
+			}
+			playedDataJSON, err := json.Marshal(playedData)
+			if err != nil {
 				return
 			}
-		}
+			game.TurnState.DidPlay = true
+			game.Broadcast(Command("played", string(playedDataJSON)))
 
-		// update player
-		player.Points += hand.Points()
-		player.Cards = playerCards
+			// check if player won
+			if player.Points >= game.Settings.PointsToWin {
+				time.Sleep(100 * time.Millisecond)
+				game.ResetState(true)
+				game.Broadcast(Command("gameover", player.Player.ID))
+				return
+			}
 
-		// re-marshal playData and broadcast
-		wanMoPair := playData.WanMoPair
-		if hand != WanMo {
-			wanMoPair = make([]structs.Card, 0)
+			// draw cards until player has 5 cards
+			drewCards := make([]structs.Card, 0)
+			for len(player.Cards) < 5 {
+				card := structs.RandomCard()
+				player.Cards = append(player.Cards, card)
+				drewCards = append(drewCards, card)
+			}
+			drewCardsJson, err := json.Marshal(CardsBodyJSON{
+				Cards: drewCards,
+			})
+			if err != nil {
+				return
+			}
+			player.Send <- Command("autodraw", string(drewCardsJson))
 		}
-		playedData := PlayedCardsJson{
-			Cards: playData.Cards,
-			HandType: hand,
-			WanMoPair: wanMoPair,
-		}
-		playedDataJSON, err := json.Marshal(playedData)
-		if err != nil {
-			return
-		}
-		game.TurnState.DidPlay = true
-		game.Broadcast(Command("played", string(playedDataJSON)))
-
-		// check if player won
-		if player.Points >= game.Settings.PointsToWin {
-			time.Sleep(100 * time.Millisecond)
-			game.ResetState(true)
-			game.Broadcast(Command("gameover", player.Player.ID))
-			return
-		}
-
-		// draw cards until player has 5 cards
-		drewCards := make([]structs.Card, 0)
-		for len(player.Cards) < 5 {
-			card := structs.RandomCard()
-			player.Cards = append(player.Cards, card)
-			drewCards = append(drewCards, card)
-		}
-		drewCardsJson, err := json.Marshal(CardsBodyJSON{
-			Cards: drewCards,
-		})
-		if err != nil {
-			return
-		}
-		player.Send <- Command("autodraw", string(drewCardsJson))
 	}
 
 	// update game state

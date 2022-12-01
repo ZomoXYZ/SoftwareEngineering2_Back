@@ -17,7 +17,8 @@ const (
 	BigPair // doubletrianglecircle + doubletriangleinverted / doublecircletriangle + doublecircleinverted
 
 	QuadFree
-	WanMo
+	WanMo_DoubleShapePair
+	WanMo_BigPair
 
 	NoHand
 )
@@ -30,7 +31,7 @@ func (h Hand) Points() int {
 		return 2
 	case TripleFree, DoubleShapePair, BigPair:
 		return 3
-	case QuadFree, WanMo:
+	case QuadFree, WanMo_DoubleShapePair, WanMo_BigPair:
 		return 4
 	}
 	return 0
@@ -55,11 +56,14 @@ func calculateHand(hand []structs.Card, wanMoPair []structs.Card) Hand {
 		}
 		// special pairs
 		if structs.CardsFollow(hand, structs.Circle2, structs.Triangle2) {
+			if len(wanMoPair) == 2 && wanMoPair[0].MatchAll(wanMoPair[1]) {
+				return WanMo_DoubleShapePair
+			}
 			return DoubleShapePair
 		}
 		if structs.CardsFollow(hand, structs.CircleTriangle2, structs.CircleInverted2) || structs.CardsFollow(hand, structs.TriangleCircle2, structs.TriangleInverted2) {
 			if len(wanMoPair) == 2 && wanMoPair[0].MatchAll(wanMoPair[1]) {
-				return WanMo
+				return WanMo_BigPair
 			}
 			return BigPair
 		}

@@ -223,7 +223,7 @@ func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
 			// make sure player has the cards they are playing and remove them
 			playerCards := player.Cards
 			cardsPlayed := playData.Cards
-			if hand == WanMo {
+			if hand == WanMo_DoubleShapePair || hand == WanMo_BigPair {
 				cardsPlayed = append(cardsPlayed, playData.WanMoPair...)
 			}
 			for _, card := range cardsPlayed {
@@ -252,7 +252,7 @@ func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
 
 			// re-marshal playData and broadcast
 			wanMoPair := playData.WanMoPair
-			if hand != WanMo {
+			if hand != WanMo_DoubleShapePair && hand != WanMo_BigPair {
 				wanMoPair = make([]structs.Card, 0)
 			}
 			playedData := PlayedCardsJson{

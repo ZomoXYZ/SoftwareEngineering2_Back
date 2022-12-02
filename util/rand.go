@@ -34,3 +34,20 @@ func GenerateToken() string {
     }
     return hex.EncodeToString(b)
 }
+
+func RandomKeyFromMap(m map[int]string) int {
+    rand.Seed(time.Now().UnixNano())
+    var keys []int
+    for k := range m {
+        keys = append(keys, k)
+    }
+    return keys[rand.Intn(len(keys))]
+}
+
+func ValidateKeyFromMap(m map[int]string, key int) int {
+    _, ok := m[key]
+    if ok {
+        return key
+    }
+    return RandomKeyFromMap(m)
+}

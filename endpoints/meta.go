@@ -2,37 +2,17 @@ package endpoints
 
 import (
 	"edu/letu/wan/database"
-	"encoding/json"
-	"io/ioutil"
+	"edu/letu/wan/metauser"
 
 	"github.com/gin-gonic/gin"
 )
-
-type MetaNamesJSON struct {
-	Adjectives map[int]string `json:"adjectives"`
-	Nouns map[int]string `json:"nouns"`
-}
-
-type MetaAvatarsJSON struct {
-	Avatars map[int]string `json:"avatars"`
-}
 
 func MetaNames(c *gin.Context) {
 	if !database.IsAuthorized(c) {
 		return
 	}
 
-	content, err := ioutil.ReadFile("./resources/names.json")
-    if err != nil {
-        c.AbortWithStatus(500)
-    }
- 
-	// validate json before sending it
-    var payload MetaNamesJSON
-    err = json.Unmarshal(content, &payload)
-    if err != nil {
-        c.AbortWithStatus(500)
-    }
+	payload := metauser.GetMetaNames()
 
 	c.JSON(200, payload)
 }

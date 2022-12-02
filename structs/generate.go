@@ -1,6 +1,7 @@
 package structs
 
 import (
+	"edu/letu/wan/metauser"
 	"edu/letu/wan/util"
 	"math/rand"
 	"time"
@@ -18,10 +19,12 @@ func GeneratePlayer() Player {
 	}
 
 	var playerid = node.Generate()
-	// 100 is temporary
-	var nameAdj = rand.Intn(100)
-	var nameNoun = rand.Intn(100)
-	var picture = rand.Intn(100)
+
+	names := metauser.GetMetaNames()
+
+	var nameAdj = util.RandomKeyFromMap(names.Adjectives)
+	var nameNoun = util.RandomKeyFromMap(names.Nouns)
+	var picture = rand.Intn(100) // TODO pictures
 
 	return Player{
 		ID: playerid.String(),

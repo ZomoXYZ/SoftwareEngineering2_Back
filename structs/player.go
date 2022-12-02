@@ -1,17 +1,22 @@
 package structs
 
 type PlayerName struct {
-	Adjective int `json:"adjective" binding:"required"`
-	Noun int `json:"noun" binding:"required"`
+	Adjective int `json:"adjective"`
+	Noun int `json:"noun"`
 }
 
 type Player struct {
-	ID string `json:"id" binding:"required"`
-	Name PlayerName `json:"name" binding:"required"`
-	Picture int `json:"picture" binding:"required"`
+	ID string `json:"id"`
+	Name PlayerName `json:"name"`
+	Picture int `json:"picture"`
+}
+
+type PlayerNameOpt struct {
+	Adjective *int `json:"adjective" validate:"exists"`
+	Noun *int `json:"noun" validate:"exists"`
 }
 
 type RestBodySelf struct {
-	Name *PlayerName `json:"name,omitempty"`
-	Picture *int `json:"picture,omitempty"`
+	Name *PlayerNameOpt `json:"name"`
+	Picture *int `json:"picture"`
 }

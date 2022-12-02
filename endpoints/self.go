@@ -2,7 +2,10 @@ package endpoints
 
 import (
 	"edu/letu/wan/database"
+	"edu/letu/wan/metauser"
 	"edu/letu/wan/structs"
+	"edu/letu/wan/util"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,20 +28,30 @@ func SetSelf(c *gin.Context) {
 	var requestBody structs.RestBodySelf
 
 	if err := c.BindJSON(&requestBody); err != nil {
+		fmt.Println(err)
 		return
 	}
 
-	if (requestBody.Name == nil && requestBody.Picture == nil) {
+	names := metauser.GetMetaNames()
+
+	if requestBody.Name == nil && requestBody.Picture == nil {
 		c.JSON(400, structs.ErrorJson{
 			Error: "invalid request body",
 		})
 		return
 	}
 
-	if (requestBody.Name != nil) {
-		player.Name = *requestBody.Name
+	if requestBody.Name != nil {
+		if requestBody.Name.Adjective != nil {
+			adj := util.ValidateKeyFromMap(names.Adjectives, *requestBody.Name.Adjective)
+			player.Name.Adjective = adj
+		}
+		if requestBody.Name.Noun != nil {
+			noun := util.ValidateKeyFromMap(names.Nouns, *requestBody.Name.Noun)
+			player.Name.Noun = noun
+		}
 	}
-	if (requestBody.Picture != nil) {
+	if requestBody.Picture != nil {
 		player.Picture = *requestBody.Picture
 	}
 

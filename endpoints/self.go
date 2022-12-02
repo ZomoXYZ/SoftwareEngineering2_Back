@@ -33,6 +33,7 @@ func SetSelf(c *gin.Context) {
 	}
 
 	names := metauser.GetMetaNames()
+	avatars := metauser.GetMetaAvatars()
 
 	if requestBody.Name == nil && requestBody.Picture == nil {
 		c.JSON(400, structs.ErrorJson{
@@ -52,7 +53,8 @@ func SetSelf(c *gin.Context) {
 		}
 	}
 	if requestBody.Picture != nil {
-		player.Picture = *requestBody.Picture
+		picture := util.ValidateKeyFromMap(avatars.Avatars, *requestBody.Picture)
+		player.Picture = picture
 	}
 
 	database.UpdatePlayer(token, player)

@@ -44,6 +44,7 @@ func Initialize(app *gin.Engine) {
 	//meta
 	app.GET("/meta/names", MetaNames)
 	app.GET("/meta/pictures", MetaPictures)
+	app.GET("/meta/picture/:avatarID", MetaPictureServe)
 
 	//websocket
 	app.GET("/ws", gameplay.WSConnection)

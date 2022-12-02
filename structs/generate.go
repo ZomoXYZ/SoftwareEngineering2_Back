@@ -3,7 +3,6 @@ package structs
 import (
 	"edu/letu/wan/metauser"
 	"edu/letu/wan/util"
-	"math/rand"
 	"time"
 
 	"github.com/bwmarrin/snowflake"
@@ -21,10 +20,11 @@ func GeneratePlayer() Player {
 	var playerid = node.Generate()
 
 	names := metauser.GetMetaNames()
+	avatars := metauser.GetMetaAvatars()
 
 	var nameAdj = util.RandomKeyFromMap(names.Adjectives)
 	var nameNoun = util.RandomKeyFromMap(names.Nouns)
-	var picture = rand.Intn(100) // TODO pictures
+	var picture = util.RandomKeyFromMap(avatars.Avatars)
 
 	return Player{
 		ID: playerid.String(),

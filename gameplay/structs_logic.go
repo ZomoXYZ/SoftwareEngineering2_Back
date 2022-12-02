@@ -135,6 +135,13 @@ func (game *ActiveGame) run() {
 				game.Players = append(game.Players[:index], game.Players[index+1:]...)
 
 				game.Broadcast(Command("playerupdate", JsonLobbyWSFromGame(game)))
+
+				// fix current player index
+				if game.GameState.CurrentPlayer > index {
+					game.GameState.CurrentPlayer--
+				}
+
+				game.NextTurn()
 			}
 
 		// command rom player
@@ -216,4 +223,14 @@ func (game *ActiveGame) ResetState(inLobby bool) {
 	}
 	// lobby state
 	database.GetLobby(game.LobbyID).Started = !inLobby
+}
+
+func (game *ActiveGame) NextTurn() {
+	game.GameState.CurrentPlayer = (game.GameState.CurrentPlayer + 1) % len(game.GetPlayers())
+	game.TurnState = TurnState{
+		DidDraw: false,
+		DidDiscard: false,
+		DidPlay: false,
+	}
+	broadcastTurnState(game)
 }

@@ -292,12 +292,5 @@ func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
 		}
 	}
 
-	// update game state
-	game.GameState.CurrentPlayer = (game.GameState.CurrentPlayer + 1) % len(game.GetPlayers())
-	game.TurnState = TurnState{
-		DidDraw: false,
-		DidDiscard: false,
-		DidPlay: false,
-	}
-	broadcastTurnState(game)
+	game.NextTurn()
 }

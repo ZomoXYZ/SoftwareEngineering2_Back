@@ -3,6 +3,7 @@ package gameplay
 import (
 	"edu/letu/wan/database"
 	"edu/letu/wan/structs"
+	"edu/letu/wan/util"
 	"fmt"
 	"strings"
 	"time"
@@ -132,7 +133,7 @@ func (game *ActiveGame) run() {
 						break
 					}
 				}
-				game.Players = append(game.Players[:index], game.Players[index+1:]...)
+				game.Players = util.RemoveFromSlice(game.Players, index)
 
 				game.Broadcast(Command("playerupdate", JsonLobbyWSFromGame(game)))
 
@@ -195,7 +196,7 @@ func (game *ActiveGame) GetPlayers(exclude ...*GamePlayer) []*GamePlayer {
 	for _, ex := range exclude {
 		for i, player := range players {
 			if player.Player.ID == ex.Player.ID {
-				players = append(players[:i], players[i+1:]...)
+				players = util.RemoveFromSlice(players, i)
 				break
 			}
 		}

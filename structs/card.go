@@ -1,6 +1,7 @@
 package structs
 
 import (
+	"edu/letu/wan/util"
 	"math/rand"
 	"time"
 )
@@ -140,7 +141,7 @@ func removeCard(hand []Card, card Card) (bool, []Card) {
 		}
 	}
 	if bestIndex != -1 {
-		return true, append(hand[:bestIndex], hand[bestIndex+1:]...)
+		return true, util.RemoveFromSlice(hand, bestIndex)
 	}
 	return false, []Card{}
 }

@@ -2,6 +2,7 @@ package database
 
 import (
 	"edu/letu/wan/structs"
+	"edu/letu/wan/util"
 	"fmt"
 	"sort"
 	"time"
@@ -119,7 +120,7 @@ func LeaveLobby(lobbyid string, player structs.Player) {
 	if lobby, ok := Lobbies[lobbyid]; ok {
 		for i, p := range lobby.Players {
 			if p.ID == player.ID {
-				lobby.Players = append(lobby.Players[:i], lobby.Players[i+1:]...)
+				lobby.Players = util.RemoveFromSlice(lobby.Players, i)
 				Lobbies[lobbyid] = lobby
 			}
 		}

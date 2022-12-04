@@ -2,6 +2,7 @@ package gameplay
 
 import (
 	"edu/letu/wan/structs"
+	"edu/letu/wan/util"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -165,7 +166,7 @@ func commandDiscard(game *ActiveGame, player *GamePlayer, args []string) {
 
 	for i, card := range player.Cards {
 		if card == discardCard {
-			player.Cards = append(player.Cards[:i], player.Cards[i+1:]...)
+			player.Cards = util.RemoveFromSlice(player.Cards, i)
 			found = true
 			break
 		}
@@ -230,11 +231,7 @@ func commandPlay(game *ActiveGame, player *GamePlayer, args []string) {
 				var found = false
 				for i, playerCard := range playerCards {
 					if playerCard == card {
-						if i < len(playerCards) - 1 {
-							playerCards = append(playerCards[:i], playerCards[i+1:]...)
-						} else {
-							playerCards = playerCards[:i]
-						}
+						playerCards = util.RemoveFromSlice(playerCards, i)
 						found = true
 						break
 					}

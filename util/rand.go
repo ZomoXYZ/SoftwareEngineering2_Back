@@ -51,3 +51,11 @@ func ValidateKeyFromMap(m map[int]string, key int) int {
     }
     return RandomKeyFromMap(m)
 }
+
+func RemoveFromSlice[S ~[]E, E any](s S, index int) S {
+    if index < len(s) - 1 {
+        return append(s[:index], s[index+1:]...)
+    } else {
+        return s[:index]
+    }
+}

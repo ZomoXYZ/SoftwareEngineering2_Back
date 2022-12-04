@@ -138,7 +138,7 @@ func (game *ActiveGame) run() {
 				game.Broadcast(Command("playerupdate", JsonLobbyWSFromGame(game)))
 
 				// fix current player index
-				if game.GameState.CurrentPlayer > index {
+				if game.GameState.CurrentPlayer >= index {
 					game.GameState.CurrentPlayer--
 				}
 

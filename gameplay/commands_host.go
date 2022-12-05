@@ -67,6 +67,12 @@ func commandSetPointGoal(game *ActiveGame, cmd *PlayerCommandMessage) {
 		cmd.Player.Send <- Command("error", "setpointgoal", "point goal is not an integer")
 	}
 
+	if pointGoal < 1 {
+		pointGoal = 1
+	}
+	if pointGoal > 99 {
+		pointGoal = 99
+	}
 	game.Settings.PointsToWin = pointGoal
 }
 type GameStartJson struct {

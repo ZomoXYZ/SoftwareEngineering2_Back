@@ -3,6 +3,7 @@ package metauser
 import (
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -48,5 +49,8 @@ func GetMetaAvatarKeys() MetaAvatarKeysJSON {
 		keys[i] = k
 		i++
 	}
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i] < keys[j]
+	})
 	return MetaAvatarKeysJSON{Avatars: keys}
 }
